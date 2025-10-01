@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Posada Las Mandarinas</title>
+        <link rel="stylesheet" href="css/stylepaginaweb.css">
+    </head>
+    <body>
+            <header id="menu">
+                <nav class="menu">
+                    <img src="img/LogoPosada.png" alt="Logo de la Posada" class="logo">
+                    <span class="hamburguesa" onclick="toggleMenu()">&#9776;</span>
+                    <ul>
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#descripcion">Servicios</a></li>
+                        <li><a href="#habitaciones">Habitaciones</a></li>
+                        <li><a href="#ubicacion" id="ubicacion-btn">Ubicacion</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                        <li class="reservar"><a href="Funciones/reserva.php">Reservar</a></li>
+                        
+                    </ul>
+                </nav>
+            </header>
+            <div class="imagen-grande">
+                <img src="img/rialg.jpg" alt="posada goty">
+                <div class="texto-superpuesto">
+                    <h1>BIENVENIDOS A LA POSADA "LAS MANDARINAS"</h1>
+                    <p >Sitio Web oficial donde podrás informarte sobre nuestros servicios y reservar tu habitación.</p>
+                    <a href="Funciones/reserva.php" class="boton-reservar" id="descripcion">Reservar Ahora</a><!-- Aquí va el ID DESCRIPCION-->
+                </div>
+            </div>
+            <div class="borde-image">
+                <div class="borde-inferior"></div>
+            </div>
+            
+                    <!-- DESCRIPCION -->
+            
+            <h1 class="descripcion">‎ </h1>
+
+            <div class="container">
+
+                  <img class="imgDescripcion" src="img/horario.jpg" alt="" id="habitaciones">
+                  <img class="imgDescripcio" src="img/servicios.png" alt="" id="habitaciones">
+            </div>
+        
+
+            
+                
+                <!-- HABITACIONES -->
+                <h1 class="descripcion">‎ </h1>
+                
+                <h2 class="habitaciones"> <center> Habitaciones</h2> </center>
+                
+                <section class="informacion-habitaciones">
+                    <div class="habitacion">
+                        <img src="img/habitacion1.jpeg" alt="Habitación 1">
+                        <p> <center> Habitaciones cómodas y relajantes.</p> </center>
+                    </div>
+                    <div class="habitacion">
+                        <img src="img/habitacion3.jpeg" alt="Habitación 2">
+                        <p> <center> Sala de estar con entretenimiento.</p> </center>
+                    </div>
+                    <div class="habitacion">
+                        <img src="img/habitacion2.jpeg" alt="Habitación 2">
+                        <p > <center> Habitaciones individuales.</p> </center>
+                    </div>
+                </section>
+            
+                <!-- Sección de Información de las Habitaciones -->
+                <section class="informacion-habitaciones">
+                    <div class="habitacion-info">
+                        <img src="img/habitacion4.jpeg" alt="Información Habitación 1" id="ubicacion">
+                        <p> <center> Baños disponibles para los clientes.</p> </center>
+                    </div>
+                    <div class="habitacion-info">
+                        <img src="img/habitacion5.jpeg" alt="Información Habitación 2">
+                        <p> <center> Recepción disponible en todo momento.</p> </center>
+                    </div>
+                    <div class="habitacion-info">
+                        <img src="img/habitacion6.jpg" alt="Información Habitación 2">
+                        <p> <center> Bellas instalaciones desde el exterior.</p> </center>
+                    </div>
+                </section>
+
+
+
+
+        <!-- UBICACION -->
+            
+<section class="ubicacion-section">
+    <h1>Ubicación</h1>
+    <div class="ubicacion-container">
+        <iframe class="ubicacion-mapa" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.1430613281767!2d-71.2473138!3d8.5455449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e647cd3bfda1ecf%3A0xa5c60a1bb6297ac9!2sPosada%20Las%20Mandarinas!5e0!3m2!1sen!2suk!4v1649282909342!5m2!1sen!2suk&zoom=15&maptype=roadmap" allowfullscreen loading="lazy"></iframe>
+        <div class="ubicacion-texto">
+            <h2>Estamos ubicados en:</h2>
+            <p>Av. Fernandez Peña. Casa N°8, dos cuadras más abajo de la Plaza Matriz de Ejido, Estado Mérida Venezuela.</p>
+        </div>
+    </div>
+</section>
+
+        <!-- CONTACTO -->    
+        <main>
+
+            <section class="contact-info">
+                <Center> <h1 id="contacto">Contacto</h1>
+                <h2>Información de Contacto</h2>
+                <p>Teléfono: 0274-2215417</p>
+                <p>Correo electrónico: posadalasmandarinasmerida@gmail.com</p>
+                <p>Dirección: Avenida Fernandez Peña, Casa Número 8. Dos cuadras mas abajo de la Iglesia Maríz de Ejido, Estado Mérida - Venezuela</p> </Center>
+                <center> <a href="https://www.facebook.com/wilson.medina.33" target="_blank">
+                    <img src="img/facebook.png" alt="Facebook" width="30" height="30">
+                </a>
+            
+                <a href="https://www.instagram.com/posada_las_mandarinas/" target="_blank">
+                    <img src="img/instagram.png" alt="Instagram" width="30" height="30">
+                </a> 
+                <a href="https://www.whatsapp.com" target="_blank">
+                    <img src="img/whatsapp.png" alt="WhatsApp" width="30" height="30"> </center>
+                </a>
+                <center>
+                    <p> <h5> Síguenos en nuestras redes sociales</p> </h5>
+                </center>
+            </center>
+        </section>
+        <section class="contact-form">
+            <h2>Envíanos un mensaje</h2>
+            <form action="https://formspree.io/f/mgvekkgb" method="POST" onsubmit="return validateForm()">
+              <label for="name">Nombre y Apellido:</label>
+              <input type="text" id="name" name="name" required maxlength="21">
+              <label for="email">Correo electrónico:</label>
+              <input type="email" id="email" name="email" required>
+              <label for="message">Mensaje:</label>
+              <textarea id="message" name="message" required maxlength="255"></textarea>
+              <button type="submit">Enviar</button>
+            </form>
+          
+            <script>
+            function validateForm() {
+              const name = document.getElementById("name").value;
+              const nameRegex = /^[a-zA-Z\s]+$/; // Expresión regular para permitir solo letras y espacios
+              if (!nameRegex.test(name)) {
+                alert("El nombre solo puede contener letras y espacios.");
+                return false;
+              }
+            }
+            </script>
+          </section>
+                
+        </main> 
+            <footer>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>Reserva Ahora</h3>
+                        <a href="Funciones/reserva.php">Haz tu reserva</a>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Fotos</h3>
+                        <a href="#habitaciones">Galería de fotos</a>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Cómo llegar</h3>
+                        <a href="#ubicacion">Indicaciones de llegada</a>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Solo administradores</h3>
+                        <a href="../views/login.php">Acceso a la zona administrativa</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; Mérida  2024 Posada Turística Las Mandarinas. Todos los derechos reservados.</p>
+                </div>
+            </footer>
+            
+
+        <script src="js/script.js"></script>
+    </body>
+    
+</html>

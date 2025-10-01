@@ -1,0 +1,664 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra */
+}
+
+.menu {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  margin-left: 20px;
+  max-width: 200px;
+}
+
+.menu ul {
+  z-index: 1000;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.menu ul li {
+  display: inline;
+  margin-right: 20px;
+}
+
+.menu ul li.reservar {
+  border: 2px solid #ba3b0a;
+  border-radius: 5px;
+  padding: 15px 40px;
+}
+
+.menu ul li.reservar a {
+  color: #ba3b0a;
+  font-weight: bold;
+}
+
+.menu ul li.reservar a:hover {
+  color: #a02d00;
+  background-color: #ffd2a6;
+}
+
+.menu ul li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 22px;
+}
+
+.menu ul li a:hover {
+  color: #666;
+}
+
+/* Ocultamos el menú y mostramos el ícono de hamburguesa en pantallas pequeñas */
+.hamburguesa {
+  display: none;
+  font-size: 30px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+/* Estilos de la imagen de fondo y texto */
+.imagen-grande img {
+  width: 100%;
+  height: auto;
+  opacity: 0.5;
+}
+
+.borde-image {
+  position: relative;
+}
+
+.borde-inferior {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background-color: #ba3b0a;
+  z-index: 0;
+}
+
+.texto-superpuesto {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgb(0, 0, 0);
+  text-align: center;
+  font-size: 27px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-size: 27px; /* Tamaño para pantallas grandes */
+}
+
+@media (max-width: 1024px) {
+  .texto-superpuesto {
+    font-size: 18px; /* Tamaño para pantallas medianas */
+    top: 40%;
+  }
+}
+
+@media (max-width: 768px) {
+  .texto-superpuesto {
+    font-size: 16px; /* Tamaño para pantallas tablet o pequeñas */
+    top: 35%;
+  }
+}
+
+@media (max-width: 480px) {
+  .texto-superpuesto{
+    font-size: 12px; /* Tamaño para pantallas móviles */
+    top: 29%;
+  }
+
+}
+.boton-reservar {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #ba3b0a;
+  color: white;
+  text-decoration: none;
+  border-radius: 20px;
+  font-weight: normal;
+  font-size: 30px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+@media (max-width: 1024px) {
+  .boton-reservar {
+    font-size: 18px; /* Tamaño para pantallas medianas */
+  }
+}
+
+@media (max-width: 768px) {
+  .boton-reservar {
+    font-size: 16px; /* Tamaño para pantallas tablet o pequeñas */  
+  }
+}
+
+@media (max-width: 480px) {
+  .boton-reservar{
+    font-size: 12px; /* Tamaño para pantallas móviles */
+  }
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+@media (max-width: 1024px) {
+  .sticky {
+    position: fixed;
+    
+  }
+}
+
+@media (max-width: 768px) {
+  .sticky {
+    position: sticky;
+    
+  }
+}
+
+@media (max-width: 480px) {
+  .sticky {
+    position: sticky;
+    
+  }
+}
+
+/* Responsividad para pantallas pequeñas */
+@media (max-width: 768px) {
+  .menu ul {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    background-color: white;
+    width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .menu ul li {
+    display: block;
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  .hamburguesa {
+    display: block;
+  }
+
+  .menu ul.show {
+    display: flex;
+  }
+}
+
+/*DESCRIPCION*/
+
+.descripcion{
+  font-style: bold;
+  color: #ba3c0a ;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 30px;
+  margin-left: 18px;
+}
+
+.container{
+  display: flex;
+  justify-content: center;
+  background-color: #ba3c0a80;
+  padding: 20px;
+  margin: 20px;
+  gap: 20px;
+ font-family: Arial, Helvetica, sans-serif;
+ font-size: 25px;
+ border-style:unset;
+ border-radius: 5px;
+ flex-wrap: wrap;
+}
+
+.imgDescripcion{
+  width: 100%; /* Asegura que el ancho de la imagen se adapte al contenedor */
+  height: auto; /* Mantiene la proporción de la imagen */
+  max-width: 500px;
+  border-radius: 20px;
+}
+
+.imgDescripcio{
+  width: 100%; /* Asegura que el ancho de la imagen se adapte al contenedor */
+  height: auto; /* Mantiene la proporción de la imagen */
+  max-width: 500px;
+  border-radius: 20px;
+}
+
+/* Ajusta la cantidad según la altura de tu menú */
+#descripcion {
+  scroll-margin-top: -250px; /* Cambia 80px por la altura exacta del menú */
+}
+
+@media (max-width: 1024px) {
+  #descripcion {
+    scroll-margin-top: -100px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 768px) {
+  #descripcion {
+    scroll-margin-top: -100px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 480px) {
+  #descripcion {
+    scroll-margin-top: 0px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+/*HABITACIONES*/
+
+.habitaciones {
+  text-align: center;
+  font-size: 2em;
+  font-weight: bold;
+  color: #ba3c0a;
+  margin-bottom: 1em;
+}
+
+/* Contenedor de las habitaciones */
+.informacion-habitaciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* Estilo para cada habitación */
+.habitacion, .habitacion-info {
+  width: 300px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.habitacion:hover, .habitacion-info:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Imágenes dentro de cada habitación */
+.habitacion img, .habitacion-info img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+/* Texto descriptivo */
+.habitacion p, .habitacion-info p {
+  font-size: 1em;
+  color: #666;
+}
+
+/* Estilo responsivo */
+@media (max-width: 768px) {
+  .informacion-habitaciones {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .habitacion, .habitacion-info {
+      width: 90%;
+  }
+}
+
+/* Ajusta la cantidad según la altura de tu menú */
+#habitaciones {
+  scroll-margin-top: -485px; /* Cambia 80px por la altura exacta del menú */
+}
+
+@media (max-width: 1024px) {
+  #habitaciones {
+    scroll-margin-top: -1000px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 768px) {
+  #habitaciones {
+    scroll-margin-top: -1000px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 480px) {
+  #habitaciones {
+    scroll-margin-top: -775px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+/*UBICACION*/
+
+/* Estilos para la sección de ubicación */
+.ubicacion-section {
+  text-align: center;
+  margin: 2em 0;
+  font-family: Arial, sans-serif;
+}
+
+.ubicacion-section h1 {
+  font-size: 2em;
+  color: #ba3c0a ;
+  margin-bottom: 1em;
+}
+
+/* Contenedor flexible para mapa y texto */
+.ubicacion-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background-color: #ba3c0a80;
+  padding: 20px;
+  margin: 20px;
+  border-style:unset;
+  border-radius: 5px;
+}
+
+.ubicacion-mapa {
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  border: none;
+  border-radius: 8px;
+}
+
+.ubicacion-texto {
+  max-width: 400px;
+  padding: 1em;
+  background-color:  rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ubicacion-texto h2 {
+  font-size: 1.5em;
+  color: #555;
+  margin-bottom: 0.5em;
+}
+
+.ubicacion-texto p {
+  font-size: 1em;
+  color: #666;
+}
+
+/* Ajusta la cantidad según la altura de tu menú */
+#ubicacion {
+  scroll-margin-top: -220px; /* Cambia 80px por la altura exacta del menú */
+}
+
+@media (max-width: 1024px) {
+  #ubicacion {
+    scroll-margin-top: -550px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 768px) {
+  #ubicacion {
+    scroll-margin-top: -1750px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 480px) {
+  #ubicacion {
+    scroll-margin-top: -1165px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+/*CONTACTO*/
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+/*.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}*/
+
+/* Contact Info Section */
+.contact-info {
+  background-color: #f5f5f5;
+  padding: 40px 0;
+}
+
+.contact-info h1 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.contact-info h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.contact-info p {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.contact-info img {
+  margin-right: 20px; 
+}
+
+/* Ajusta la cantidad según la altura de tu menú */
+#contacto {
+  scroll-margin-top: 200px; /* Cambia 80px por la altura exacta del menú */
+}
+
+@media (max-width: 1024px) {
+  #contacto {
+    scroll-margin-top: 200px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 768px) {
+  #contacto {
+    scroll-margin-top: 200px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+@media (max-width: 480px) {
+  #contacto {
+    scroll-margin-top: 200px; /* Cambia 80px por la altura exacta del menú */
+  }
+}
+
+/* Contact Form Section */
+.contact-form {
+  padding: 40px 0;
+}
+
+.contact-form h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.contact-form form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 20px;
+}
+
+.contact-form label {
+  font-size: 16px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.contact-form textarea {
+  grid-column: 1 / -1;
+  height: 150px;
+}
+
+.contact-form button {
+  grid-column: 1 / -1;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.contact-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .contact-form form {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-form textarea {
+    grid-column: auto;
+  }
+
+  .contact-form button {
+    grid-column: auto;
+  }
+}
+
+footer {
+  background-color: #333;
+  color: #fff;
+  padding: 40px 0;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  flex-basis: 25%;
+  padding: 0 20px;
+}
+
+.footer-section h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.footer-section a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 5px;
+  transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+  color: #ccc;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 14px;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+.footer-logo {
+  margin-right: 20px;
+}
+
+.footer-logo img {
+  max-height: 50px;
+  width: auto;
+}
+
+.servicios-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.servicios-recuadro {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: left;
+  width: 80%;
+  max-width: 600px;
+}
+
+.servicios-recuadro h3 {
+  margin-top: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.servicios-recuadro ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.servicios-recuadro li {
+  margin-bottom: 10px;
+}
+
+.horario {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+
+
