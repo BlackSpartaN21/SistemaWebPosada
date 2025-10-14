@@ -33,6 +33,7 @@ LEFT JOIN reservas r ON h.id_habitacion = r.id_habitacion AND r.estado_reserva =
 LEFT JOIN clientes c ON r.documento_cliente = c.documento_cliente
 LEFT JOIN metodos_de_pago m ON r.id_metodo_pago = m.id_metodo_pago
 -- LIMIT :inicio, :limite
+WHERE h.estado_habitacion <> 3
 ORDER BY h.id_habitacion ASC
 ";
 
