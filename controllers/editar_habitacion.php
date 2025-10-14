@@ -1,5 +1,8 @@
 <?php
 include '../config/db.php';
+require_once '../config/db.php';
+require_once '../config/auth.php';
+require_admin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id_habitacion'];

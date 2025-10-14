@@ -1,6 +1,8 @@
 <?php
-// Este archivo asume que ya tienes disponibles: $habitaciones y $tiposHabitacion
+  // Este archivo asume que ya tienes disponibles: $habitaciones y $tiposHabitacion
+
 ?>
+
 
 <!-- Botón para agregar nueva habitación -->
 <div class="d-flex justify-content-between align-items-center mb-3">

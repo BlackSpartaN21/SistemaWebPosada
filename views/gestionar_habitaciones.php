@@ -1,27 +1,30 @@
 <?php
-include '../config/db.php';
-include '../views/header.php';
+  require_once '../config/auth.php';
+  require_admin();
+  require_once '../config/db.php';
+  include '../config/db.php';
+  include '../views/header.php';
 
-// Tipos de habitación
-$stmtTipos = $pdo->query("SELECT * FROM tipo_habitaciones");
-$tiposHabitacion = $stmtTipos->fetchAll(PDO::FETCH_ASSOC);
+  // Tipos de habitación
+  $stmtTipos = $pdo->query("SELECT * FROM tipo_habitaciones");
+  $tiposHabitacion = $stmtTipos->fetchAll(PDO::FETCH_ASSOC);
 
-// Habitaciones
-$stmtHabitaciones = $pdo->query("
-  SELECT h.*, t.nombre_tipo_habitacion
-  FROM habitaciones h
-  JOIN tipo_habitaciones t ON h.id_tipo_habitacion = t.id_tipo_habitacion
-  ORDER BY h.id_habitacion ASC
-");
-$habitaciones = $stmtHabitaciones->fetchAll(PDO::FETCH_ASSOC);
+  // Habitaciones
+  $stmtHabitaciones = $pdo->query("
+    SELECT h.*, t.nombre_tipo_habitacion
+    FROM habitaciones h
+    JOIN tipo_habitaciones t ON h.id_tipo_habitacion = t.id_tipo_habitacion
+    ORDER BY h.id_habitacion ASC
+  ");
+  $habitaciones = $stmtHabitaciones->fetchAll(PDO::FETCH_ASSOC);
 
-// Tarifas
-$stmtTarifas = $pdo->query("
-  SELECT ta.*, th.nombre_tipo_habitacion
-  FROM tarifas ta
-  JOIN tipo_habitaciones th ON ta.id_tipo_habitacion = th.id_tipo_habitacion
-");
-$tarifas = $stmtTarifas->fetchAll(PDO::FETCH_ASSOC);
+  // Tarifas
+  $stmtTarifas = $pdo->query("
+    SELECT ta.*, th.nombre_tipo_habitacion
+    FROM tarifas ta
+    JOIN tipo_habitaciones th ON ta.id_tipo_habitacion = th.id_tipo_habitacion
+  ");
+  $tarifas = $stmtTarifas->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>

@@ -1,5 +1,8 @@
 <?php
 include '../config/db.php';
+require_once '../config/db.php';
+require_once '../config/auth.php';
+require_admin();
 
 // Recibir datos del formulario
 $nombreHabitacion = $_POST['nombre_habitacion'];

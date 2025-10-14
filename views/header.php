@@ -1,3 +1,7 @@
+<?php
+    if (session_status() === PHP_SESSION_NONE) { session_start(); }
+    $rol = $_SESSION['rol'] ?? null; // 'Administrador' | 'Recepcionista' | null
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -16,6 +20,7 @@
 }
 
         body {
+            
             background-image: url('../public/img/wallpaper3.png'); /* Ajusta la ruta según tu estructura */
             background-size: cover;
             background-position: center;
@@ -87,6 +92,7 @@
             border: 3px solid #BA3B0A; /* Borde con el color de la marca */
             padding: 2px; /* Espaciado interno para que el borde no toque la imagen */
         }
+        
     </style>
 </head>
 <body>
@@ -116,15 +122,18 @@
                     <li class="nav-item">
                         <a class="nav-link" href="reportes.php">Reportes</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <?php if ($rol === 'Administrador'): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Herramientas Administrativas
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                             <li><a class="dropdown-item" href="gestionar_habitaciones.php">Gestionar Habitación</a></li>
                             <li><a class="dropdown-item" href="gestionar_usuarios.php">Gestionar Usuarios</a></li>
-                        </ul>
-                    </li>
+                            <!-- Agrega más ítems admin aquí -->
+                            </ul>
+                        </li>
+<?php endif; ?>
                 </ul>
                 <!-- Avatar y Dropdown para usuario alineado a la derecha -->
                 <ul class="navbar-nav ms-auto"> <!-- Esto alinea el módulo del usuario a la derecha -->
@@ -229,8 +238,8 @@
     </div>
 
     <script src="../public/js/validacion.js"></script>
-    <script src="../public/js/bootstrap.bundle.min.js"></script>
     <script src="../public/js/sweetalert2.min.js"></script>
+    <script src="../public/js/bootstrap.bundle.min.js"></script>
 
 
 

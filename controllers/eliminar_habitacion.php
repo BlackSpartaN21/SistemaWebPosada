@@ -1,5 +1,8 @@
 <?php
 include '../config/db.php';
+require_once '../config/db.php';
+require_once '../config/auth.php';
+require_admin();
 
 if (!isset($_GET['id'])) {
     echo json_encode(['success' => false, 'message' => 'ID de habitación no especificado.']);
