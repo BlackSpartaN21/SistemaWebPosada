@@ -54,7 +54,6 @@ if (isset($pdo) && $pdo) {
 <link rel="stylesheet" href="../public/css/datatables.min.css">
 <link rel="stylesheet" href="../public/css/select2.min.css">
 <script src="../public/js/jquery-3.7.1.min.js"></script>
-<script src="../public/js/bootstrap.bundle.min.js"></script>
 <script src="../public/js/datatables.min.js"></script>
 <script src="../public/js/sweetalert2.min.js"></script>
 <script src="../public/js/select2.min.js"></script>
