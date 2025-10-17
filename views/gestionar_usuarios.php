@@ -1,34 +1,32 @@
 <?php
-// views/gestionar_usuarios.php — SOLO ADMIN
-require_once '../config/auth.php';
-require_admin();
-require_once '../config/db.php';
+  require_once '../config/auth.php';
+  require_admin();
+  require_once '../config/db.php';
 
-$currentUserId = (int)($_SESSION['id_usuario'] ?? 0);
+  $currentUserId = (int)($_SESSION['id_usuario'] ?? 0);
 
-// Traer usuarios (incluye fecha_creacion)
-$stmt = $pdo->query("
-  SELECT id_usuario, nombre_usuario, apellido_usuario, correo_usuario, rol_usuario, fecha_creacion
-  FROM usuarios
-  ORDER BY fecha_creacion DESC
-");
-$usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  // Traer usuarios (incluye fecha_creacion)
+  $stmt = $pdo->query("
+    SELECT id_usuario, nombre_usuario, apellido_usuario, correo_usuario, rol_usuario, fecha_creacion
+    FROM usuarios
+    ORDER BY fecha_creacion DESC
+  ");
+  $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Preparo dataset para DataTables (evita TN/4)
-$rows = [];
-foreach ($usuarios as $u) {
-  $ts = strtotime($u['fecha_creacion'] ?: 'now');
-  $rows[] = [
-    'id'         => (int)$u['id_usuario'],
-    'nombre'     => $u['nombre_usuario'],
-    'apellido'   => $u['apellido_usuario'],
-    'correo'     => $u['correo_usuario'],
-    'rol'        => $u['rol_usuario'],             // 'Administrador' | 'Recepcionista'
-    'fecha_iso'  => date('Y-m-d', $ts),            // para filtro rango
-    'fecha_sort' => date('Y-m-d H:i:s', $ts),      // para orden
-    'fecha_vis'  => date('d/m/Y H:i', $ts),        // visual
-  ];
-}
+  $rows = [];
+  foreach ($usuarios as $u) {
+    $ts = strtotime($u['fecha_creacion'] ?: 'now');
+    $rows[] = [
+      'id'         => (int)$u['id_usuario'],
+      'nombre'     => $u['nombre_usuario'],
+      'apellido'   => $u['apellido_usuario'],
+      'correo'     => $u['correo_usuario'],
+      'rol'        => $u['rol_usuario'],             // 'Administrador' | 'Recepcionista'
+      'fecha_iso'  => date('Y-m-d', $ts),            // para filtro rango
+      'fecha_sort' => date(' Y-m-d', $ts),      // para orden
+      'fecha_vis'  => date(' d/m/Y', $ts),        // visual
+    ];
+  }
 ?>
 <?php include 'header.php'; ?>
 

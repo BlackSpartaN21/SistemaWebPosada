@@ -165,7 +165,6 @@ if ($esOcupada && isset($habitacion['fecha_salida'])) {
       </div>
 
 
-  
           
 <?php if ($habitacion['estado_habitacion']): ?>
       <!-- Modal individual -->
