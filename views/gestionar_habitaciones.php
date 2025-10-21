@@ -22,7 +22,7 @@ if (file_exists($headerPath)) include $headerPath;
 ?>
 
 <div class="container mt-4">
-  <h2 class="mb-3">Gestión</h2>
+  <h2 class="mb-3">Gestión de Habitaciones</h2>
 
   <ul class="nav nav-tabs" id="tabsGestion" role="tablist">
     <li class="nav-item" role="presentation">
