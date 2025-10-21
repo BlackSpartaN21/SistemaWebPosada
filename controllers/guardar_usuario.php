@@ -1,4 +1,5 @@
 <?php
+// controllers/guardar_usuario.php
 require_once '../config/auth.php';
 require_admin();
 require_once '../config/db.php';
@@ -16,7 +17,12 @@ $rol        = trim($_POST['rol'] ?? '');
 $contrasena = $_POST['contrasena'] ?? null; // solo en alta
 
 // Validaciones básicas
-if ($nombre === '' || $apellido === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL) || !in_array($rol, ['Administrador','Recepcionista'], true)) {
+if (
+  $nombre === '' ||
+  $apellido === '' ||
+  !filter_var($correo, FILTER_VALIDATE_EMAIL) ||
+  !in_array($rol, ['Administrador','Recepcionista'], true)
+) {
   header('Location: ../views/gestionar_usuarios.php?error=Datos%20inv%C3%A1lidos');
   exit;
 }
@@ -75,13 +81,16 @@ try {
       ':rol' => $rol,
       ':id'  => $id_usuario,
     ]);
+
   } else {
+    // Alta de usuario
     if ($contrasena === null || strlen($contrasena) < 6) {
       header('Location: ../views/gestionar_usuarios.php?error=Contrase%C3%B1a%20inv%C3%A1lida');
       exit;
     }
     $hash = password_hash($contrasena, PASSWORD_DEFAULT);
-    $ins = $pdo->prepare('INSERT INTO usuarios (nombre_usuario, apellido_usuario, correo_usuario, contrasena_usuario, rol_usuario) VALUES (:nom, :ape, :corr, :pass, :rol)');
+    $ins = $pdo->prepare('INSERT INTO usuarios (nombre_usuario, apellido_usuario, correo_usuario, contrasena_usuario, rol_usuario)
+                          VALUES (:nom, :ape, :corr, :pass, :rol)');
     $ins->execute([
       ':nom'  => $nombre,
       ':ape'  => $apellido,
@@ -98,4 +107,7 @@ try {
   header('Location: ../views/gestionar_usuarios.php?error=Error%20de%20base%20de%20datos');
   exit;
 }
+<<<<<<< HEAD
 ?>
+=======
+>>>>>>> gestionar-hab-fab
