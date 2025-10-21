@@ -168,9 +168,9 @@
       </div>
       <div class="modal-footer">
         <!-- GUARDAR verde a la IZQUIERDA -->
-        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Guardar</button>
         <!-- CANCELAR rojo a la DERECHA -->
-        <button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancelar</button>
       </div>
     </form>
   </div>
@@ -216,9 +216,9 @@
       </div>
       <div class="modal-footer">
         <!-- GUARDAR verde a la IZQUIERDA -->
-        <button type="submit" class="btn btn-success">Guardar cambios</button>
+        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Guardar</button>
         <!-- CANCELAR rojo a la DERECHA -->
-        <button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancelar</button>
       </div>
     </form>
   </div>
@@ -265,7 +265,7 @@
         <!-- GUARDAR verde a la IZQUIERDA -->
         <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Guardar</button>
         <!-- CANCELAR rojo a la DERECHA -->
-        <button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancelar</button>
       </div>
     </form>
   </div>
@@ -295,8 +295,9 @@
         <!-- ACCIÓN DESTRUCTIVA rojo a la IZQUIERDA -->
         <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Eliminar</button>
         <!-- CANCELAR verde a la DERECHA (excepción por coherencia UX) -->
-        <button type="button" class="btn btn-success ms-auto" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Cancelar</button>
       </div>
+
     </form>
   </div>
 </div>
