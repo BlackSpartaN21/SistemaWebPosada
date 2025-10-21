@@ -23,8 +23,8 @@
       'correo'     => $u['correo_usuario'],
       'rol'        => $u['rol_usuario'],             // 'Administrador' | 'Recepcionista'
       'fecha_iso'  => date('Y-m-d', $ts),            // para filtro rango
-      'fecha_sort' => date(' Y-m-d', $ts),      // para orden
-      'fecha_vis'  => date(' d/m/Y', $ts),        // visual
+      'fecha_sort' => date(' Y-m-d', $ts),           // para orden (se mantiene tal cual)
+      'fecha_vis'  => date(' d/m/Y', $ts),           // visual (se mantiene tal cual)
     ];
   }
 ?>
@@ -113,7 +113,7 @@
 <!-- Nuevo -->
 <div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form action="../controllers/guardar_usuario.php" method="POST" class="modal-content bg-white">
+    <form action="../controllers/guardar_usuario.php" method="POST" class="modal-content bg-white" id="formNuevoUsuario">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Nuevo usuario</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -141,15 +141,36 @@
             <option value="Recepcionista">Recepcionista</option>
           </select>
         </div>
+
+        <!-- Contraseña + Ver/Ocultar -->
         <div class="mt-2">
           <label class="form-label">Contraseña</label>
-          <input type="password" class="form-control" name="contrasena" minlength="6" required>
+          <div class="input-group">
+            <input type="password" class="form-control" name="contrasena" id="nu_pass" minlength="6" required>
+            <button type="button" class="btn btn-outline-secondary" id="nu_toggle_1" tabindex="-1" title="Mostrar/ocultar">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
           <div class="form-text">Mínimo 6 caracteres.</div>
+        </div>
+
+        <!-- Confirmación de contraseña + Ver/Ocultar -->
+        <div class="mt-2">
+          <label class="form-label">Confirmar contraseña</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="nu_pass_confirm" minlength="6" required>
+            <button type="button" class="btn btn-outline-secondary" id="nu_toggle_2" tabindex="-1" title="Mostrar/ocultar">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback">Las contraseñas no coinciden.</div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <!-- GUARDAR verde a la IZQUIERDA -->
         <button type="submit" class="btn btn-success">Guardar</button>
+        <!-- CANCELAR rojo a la DERECHA -->
+        <button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal">Cancelar</button>
       </div>
     </form>
   </div>
@@ -194,8 +215,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <!-- GUARDAR verde a la IZQUIERDA -->
+        <button type="submit" class="btn btn-success">Guardar cambios</button>
+        <!-- CANCELAR rojo a la DERECHA -->
+        <button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal">Cancelar</button>
       </div>
     </form>
   </div>
@@ -204,7 +227,7 @@
 <!-- Reset pass -->
 <div class="modal fade" id="modalPasswordUsuario" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form action="../controllers/reset_password_usuario.php" method="POST" class="modal-content bg-white">
+    <form action="../controllers/reset_password_usuario.php" method="POST" class="modal-content bg-white" id="formResetPassword">
       <input type="hidden" name="id_usuario" id="pwd_id_usuario">
       <div class="modal-header bg-warning">
         <h5 class="modal-title"><i class="fas fa-key me-2"></i>Restablecer contraseña</h5>
@@ -214,13 +237,35 @@
         <div class="mb-2">
           <span class="small text-muted" id="pwd_usuario_nombre"></span>
         </div>
+
+        <!-- Nueva contraseña + Ver/Ocultar -->
         <label class="form-label">Nueva contraseña</label>
-        <input type="password" class="form-control" name="nueva_contrasena" minlength="6" required>
+        <div class="input-group">
+          <input type="password" class="form-control" name="nueva_contrasena" id="rp_pass" minlength="6" required>
+          <button type="button" class="btn btn-outline-secondary" id="rp_toggle_1" tabindex="-1" title="Mostrar/ocultar">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
         <div class="form-text">Mínimo 6 caracteres.</div>
+
+        <!-- Confirmación + Ver/Ocultar -->
+        <div class="mt-2">
+          <label class="form-label">Confirmar contraseña</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="rp_pass_confirm" minlength="6" required>
+            <button type="button" class="btn btn-outline-secondary" id="rp_toggle_2" tabindex="-1" title="Mostrar/ocultar">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+        </div>
       </div>
+      
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-warning"><i class="fas fa-save me-1"></i>Guardar</button>
+        <!-- GUARDAR verde a la IZQUIERDA -->
+        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Guardar</button>
+        <!-- CANCELAR rojo a la DERECHA -->
+        <button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal">Cancelar</button>
       </div>
     </form>
   </div>
@@ -247,8 +292,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <!-- ACCIÓN DESTRUCTIVA rojo a la IZQUIERDA -->
         <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Eliminar</button>
+        <!-- CANCELAR verde a la DERECHA (excepción por coherencia UX) -->
+        <button type="button" class="btn btn-success ms-auto" data-bs-dismiss="modal">Cancelar</button>
       </div>
     </form>
   </div>
@@ -293,7 +340,7 @@
                 ? '<span class="badge bg-primary">Administrador</span>'
                 : '<span class="badge bg-secondary">Recepcionista</span>';
             }
-            return data; // para orden/búsqueda interna
+            return data;
           }
         },
         {
@@ -301,7 +348,7 @@
           render: function (data, type, row) {
             if (type === 'sort' || type === 'type') return row.fecha_sort;
             if (type === 'filter') return row.fecha_vis;
-            return row.fecha_vis; // display
+            return row.fecha_vis;
           }
         },
         {
@@ -309,7 +356,6 @@
           orderable: false,
           searchable: false,
           render: function (data, type, row) {
-            // Botones con data-* para rellenar modales
             const fullName = (row.nombre || '') + ' ' + (row.apellido || '');
             return `
               <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
@@ -385,6 +431,13 @@
         const btn = event.relatedTarget; if (!btn) return;
         $('#pwd_id_usuario').val(btn.getAttribute('data-id'));
         $('#pwd_usuario_nombre').text(btn.getAttribute('data-nombre') || '');
+        // Limpiar estados de validación al abrir
+        $('#rp_pass, #rp_pass_confirm').removeClass('is-invalid');
+        $('#rp_pass, #rp_pass_confirm').val('');
+        setInputType('#rp_pass', 'password');
+        setInputType('#rp_pass_confirm', 'password');
+        setEye('#rp_toggle_1 i', false);
+        setEye('#rp_toggle_2 i', false);
       });
     }
 
@@ -398,5 +451,69 @@
         $('#del_rol').text(btn.getAttribute('data-rol') || '');
       });
     }
+
+    // ==========
+    // Helpers: ver/ocultar y validación de contraseñas
+    // ==========
+    function togglePassword(inputSel, iconSel) {
+      const $inp = $(inputSel);
+      const $ico = $(iconSel);
+      const isPw = $inp.attr('type') === 'password';
+      $inp.attr('type', isPw ? 'text' : 'password');
+      // Cambiar icono
+      if (isPw) {
+        $ico.removeClass('fa-eye').addClass('fa-eye-slash');
+      } else {
+        $ico.removeClass('fa-eye-slash').addClass('fa-eye');
+      }
+    }
+    function setInputType(sel, type) {
+      $(sel).attr('type', type);
+    }
+    function setEye(iconSel, isShown) {
+      const $ico = $(iconSel);
+      if (isShown) { $ico.removeClass('fa-eye').addClass('fa-eye-slash'); }
+      else { $ico.removeClass('fa-eye-slash').addClass('fa-eye'); }
+    }
+
+    // Nuevo usuario: toggles
+    $('#nu_toggle_1').on('click', function(){ togglePassword('#nu_pass', '#nu_toggle_1 i'); });
+    $('#nu_toggle_2').on('click', function(){ togglePassword('#nu_pass_confirm', '#nu_toggle_2 i'); });
+
+    // Reset pass: toggles
+    $('#rp_toggle_1').on('click', function(){ togglePassword('#rp_pass', '#rp_toggle_1 i'); });
+    $('#rp_toggle_2').on('click', function(){ togglePassword('#rp_pass_confirm', '#rp_toggle_2 i'); });
+
+    // Validación en tiempo real (quita la marca de error cuando coinciden)
+    $('#nu_pass, #nu_pass_confirm').on('input', function(){
+      const a = $('#nu_pass').val(), b = $('#nu_pass_confirm').val();
+      $('#nu_pass_confirm').toggleClass('is-invalid', b.length > 0 && a !== b);
+    });
+    $('#rp_pass, #rp_pass_confirm').on('input', function(){
+      const a = $('#rp_pass').val(), b = $('#rp_pass_confirm').val();
+      $('#rp_pass_confirm').toggleClass('is-invalid', b.length > 0 && a !== b);
+    });
+
+    // Validación al enviar (Nuevo usuario)
+    $('#formNuevoUsuario').on('submit', function(e){
+      const pass = $('#nu_pass').val();
+      const conf = $('#nu_pass_confirm').val();
+      if (pass !== conf) {
+        e.preventDefault();
+        $('#nu_pass_confirm').addClass('is-invalid').focus();
+        Swal.fire({icon:'error', title:'Contraseñas distintas', text:'La confirmación no coincide con la contraseña.'});
+      }
+    });
+
+    // Validación al enviar (Reset password)
+    $('#formResetPassword').on('submit', function(e){
+      const pass = $('#rp_pass').val();
+      const conf = $('#rp_pass_confirm').val();
+      if (pass !== conf) {
+        e.preventDefault();
+        $('#rp_pass_confirm').addClass('is-invalid').focus();
+        Swal.fire({icon:'error', title:'Contraseñas distintas', text:'La confirmación no coincide con la contraseña.'});
+      }
+    });
   });
 </script>

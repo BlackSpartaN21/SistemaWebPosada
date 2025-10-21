@@ -11,7 +11,7 @@ $tiposHabitacion = $tiposHabitacion ?? [];
 </div>
 
 <table id="tablaHabitaciones" class="table table-striped table-bordered w-100">
-  <thead class="table-dark"
+  <thead class="table-dark">
     <tr>
       <th>ID</th>
       <th>Número</th>
@@ -83,7 +83,23 @@ window.addEventListener('load', function() {
     language: { url: '../public/js/es-ES.json' },
     pageLength: 25,
     lengthMenu: [[10, 25, 50, 100, -1],[10, 25, 50, 100, 'Todos']],
-    dom: 'lfrtip',
+    dom:
+  "<'row align-items-center mb-2'<'col-12 col-md-6'l><'col-12 col-md-6 text-md-end'f>>" +
+  "t" +
+  "<'row align-items-center mt-2'<'col-12 col-md-5'i><'col-12 col-md-7'p>>",
+  columnDefs: [
+    { targets: 0, visible: false, searchable: false } // Oculta la col ID (primera)
+  ],
+  order: [[1, 'asc']], // Ordena por "Número"
+
+  columnDefs: [
+  { targets: 0, visible: false, searchable: false },        // ID oculto
+  { targets: [1,2,5,6], className: 'text-center' },          // Número, Tipo, Descripción, Estado
+  { targets: [3], className: 'text-center' },               // Capacidad
+  { targets: [4], className: 'text-center' }                // Acciones
+],
+
+
     columns: [
       { data: 'id_habitacion' },
       { data: 'nombre_habitacion' },
