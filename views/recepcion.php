@@ -17,8 +17,21 @@ $query = "
 SELECT 
   h.id_habitacion, 
   h.nombre_habitacion, 
-  t.nombre_tipo_habitacion, 
+  t.nombre_tipo_habitacion,
+  t.capacidad_tipo_habitacion AS capacidad_maxima,
   h.estado_habitacion,
+   -- Flags de tarifas disponibles para el tipo de esta habitación
+  EXISTS (
+    SELECT 1 FROM tarifas tf 
+    WHERE tf.id_tipo_habitacion = h.id_tipo_habitacion 
+      AND tf.tipo_tarifa = '24 Horas'
+  ) AS tiene_tarifa_24,
+
+  EXISTS (
+    SELECT 1 FROM tarifas tf 
+    WHERE tf.id_tipo_habitacion = h.id_tipo_habitacion 
+      AND tf.tipo_tarifa = '3 Horas'
+  ) AS tiene_tarifa_3,
   c.nombres_cliente,
   c.apellidos_cliente,
   c.documento_cliente,
@@ -33,6 +46,7 @@ LEFT JOIN reservas r ON h.id_habitacion = r.id_habitacion AND r.estado_reserva =
 LEFT JOIN clientes c ON r.documento_cliente = c.documento_cliente
 LEFT JOIN metodos_de_pago m ON r.id_metodo_pago = m.id_metodo_pago
 -- LIMIT :inicio, :limite
+WHERE h.estado_habitacion <> 3
 ORDER BY h.id_habitacion ASC
 ";
 
@@ -117,7 +131,7 @@ $metodosPago = $stmtMetodosPago->fetchAll(PDO::FETCH_ASSOC);
         <i class="fas fa-user me-2 text-primary"></i>
         Bienvenido, <?= htmlspecialchars($_SESSION['nombre'] . ' ' . $_SESSION['apellido']) ?>
       </h5>
-      <small class="text-muted">Rol: <?= htmlspecialchars($_SESSION['rol']) ?></small>
+      <small class="text-muted"> <?= htmlspecialchars($_SESSION['rol']) ?></small>
     </div>
   </div>
 </div>
@@ -197,20 +211,49 @@ if ($esOcupada && isset($habitacion['fecha_salida'])) {
   </div>
 
     <!-- Select de tipo de tarifa -->
+<?php
+  // Normaliza los flags (MySQL devuelve 0/1, PDO los puede traer como '0'/'1')
+  $has24 = !empty($habitacion['tiene_tarifa_24']);
+  $has3  = !empty($habitacion['tiene_tarifa_3']);
+  $disableAll = (!$has24 && !$has3);
+
+  // (Opcional) auto-selección si solo hay una tarifa disponible
+  $auto = '';
+  if ($has24 && !$has3)   { $auto = '24 Horas'; }
+  if ($has3  && !$has24)  { $auto = '3 Horas';  }
+?>
+
+<!-- Select de tipo de tarifa -->
 <div class="mb-3">
-  <label for="tipoTarifa<?php echo $habitacion['id_habitacion']; ?>" class="form-label"> <i class="fas fa-money-bill-wave"></i>Tipo de Tarifa</label>
-<select class="form-select" name="tipo_tarifa" id="tipoTarifa<?php echo $habitacion['id_habitacion']; ?>">
-  <option value=""selected>Seleccione una tarifa</option>
-    <option value="24 Horas" >24 Horas</option>
-    <option value="3 Horas" <?php echo ($habitacion['nombre_tipo_habitacion'] === 'Triple') ? 'disabled' : ''; ?>>
+  <label for="tipoTarifa<?php echo $habitacion['id_habitacion']; ?>" class="form-label">
+    <i class="fas fa-money-bill-wave"></i> Tipo de Tarifa
+  </label>
+
+  <select class="form-select"
+          name="tipo_tarifa"
+          id="tipoTarifa<?php echo $habitacion['id_habitacion']; ?>"
+          <?php echo $disableAll ? 'disabled' : ''; ?>
+          required>
+    <option value="" <?php echo $auto === '' ? 'selected' : ''; ?>>Seleccione una tarifa</option>
+    <option value="24 Horas"
+            <?php echo $has24 ? '' : 'disabled'; ?>
+            <?php echo $auto === '24 Horas' ? 'selected' : ''; ?>>
+      24 Horas
+    </option>
+    <option value="3 Horas"
+            <?php echo $has3 ? '' : 'disabled'; ?>
+            <?php echo $auto === '3 Horas' ? 'selected' : ''; ?>>
       3 Horas
     </option>
-</select>
+  </select>
 
-  <?php if ($habitacion['nombre_tipo_habitacion'] === 'Triple'): ?>
-    <div class="form-text text-danger">Solo disponible por 24 horas para habitaciones triples.</div>
+  <?php if ($disableAll): ?>
+    <div class="form-text text-danger">
+      Este tipo de habitación no tiene tarifas configuradas.
+    </div>
   <?php endif; ?>
 </div>
+
 
 <!-- Precio mostrado dinámicamente -->
 <div class="mb-3">
@@ -264,16 +307,36 @@ if ($esOcupada && isset($habitacion['fecha_salida'])) {
 
 <!-- Cantidad de Personas -->
 <div class="mb-3">
-  <label for="cantidad_personas<?php echo $habitacion['id_habitacion']; ?>" class="form-label"><i class="fas fa-users"></i>Cantidad de personas</label>
-  <select class="form-select" id="cantidad_personas<?php echo $habitacion['id_habitacion']; ?>" name="cantidad_personas" required>
-    <option value="1">1 persona</option>
-    <option value="2">2 personas</option>
-    <option value="3" <?php echo ($habitacion['nombre_tipo_habitacion'] === 'Matrimonial') ? 'disabled' : ''; ?>>3 personas</option>
+  <label for="cantidad_personas<?php echo $habitacion['id_habitacion']; ?>" class="form-label">
+    <i class="fas fa-users"></i> Cantidad de personas
+  </label>
+
+  <?php
+    $cap = (int)($habitacion['capacidad_maxima'] ?? 2); // fallback 2 por si acaso
+    // Si vienes con un valor seleccionado (ej. en edición), lo respetamos; si no, por defecto 1
+    $valorSeleccionado = isset($habitacion['cantidad_personas'])
+      ? (int)$habitacion['cantidad_personas']
+      : 1;
+    if ($valorSeleccionado < 1) $valorSeleccionado = 1;
+    if ($valorSeleccionado > $cap) $valorSeleccionado = $cap;
+  ?>
+
+  <select class="form-select"
+          id="cantidad_personas<?php echo $habitacion['id_habitacion']; ?>"
+          name="cantidad_personas" required>
+    <?php for ($i = 1; $i <= $cap; $i++): ?>
+      <option value="<?php echo $i; ?>" <?php echo ($i === $valorSeleccionado) ? 'selected' : ''; ?>>
+        <?php echo $i . ' ' . ($i === 1 ? 'persona' : 'personas'); ?>
+      </option>
+    <?php endfor; ?>
   </select>
-  <?php if ($habitacion['nombre_tipo_habitacion'] === 'Matrimonial'): ?>
-    <div class="form-text text-danger">Máximo 2 personas permitidas para habitaciones matrimoniales.</div>
-  <?php endif; ?>
+
+  <div class="form-text">
+    Capacidad máxima: <?php echo $cap . ' ' . ($cap === 1 ? 'persona' : 'personas'); ?>
+    (Tipo: <?php echo htmlspecialchars($habitacion['nombre_tipo_habitacion']); ?>)
+  </div>
 </div>
+
 
 <!-- Métodos de Pago -->
 <div class="mb-3">
