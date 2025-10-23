@@ -152,95 +152,207 @@
             </div>
         </div>
     </nav>
-    <!-- Modal de Registro de Cliente -->
-    <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="clienteModalLabel">Datos del Cliente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="clienteForm" method="POST" action="../controllers/registrar.php">
-<div class="mb-3">
-    <label for="tipo_documento_cliente" class="form-label">
-        <i class="fas fa-id-card"></i> Tipo de Documento
-    </label>
-    <select class="form-select" id="tipo_documento_cliente" name="tipo_documento_cliente" required>
-        <option value="V">V</option>
-        <option value="E">E</option>
-        <option value="P">P</option>
-        <option value="J">J</option>
-    </select>
-</div>
+    <!-- Modal de Registro/Edición de Cliente -->
+<div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="clienteModalLabel">Datos del Cliente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
 
-<div class="mb-3">
-    <label for="documento_cliente" class="form-label">
-        <i class="fas fa-id-badge"></i> Documento
-    </label>
-    <input type="text" class="form-control" id="documento_cliente" name="documento_cliente" maxlength="10" required>
-    <div class="invalid-feedback">Debe contener solo números (máx. 10).</div>
-</div>
+      <div class="modal-body">
+        <!-- Acción por defecto: CREAR (modificar.php cambia esto a EDITAR con JS) -->
+        <form id="clienteForm" method="POST" action="../controllers/registrar.php" novalidate>
+          <div class="mb-3">
+            <label for="tipo_documento_cliente" class="form-label">
+              <i class="fas fa-id-card"></i> Tipo de Documento
+            </label>
+            <select class="form-select" id="tipo_documento_cliente" name="tipo_documento_cliente" required>
+              <option value="V">V</option>
+              <option value="E">E</option>
+              <option value="P">P</option>
+              <option value="J">J</option>
+            </select>
+            <div class="valid-feedback">Se ve bien.</div>
+            <div class="invalid-feedback">Selecciona un tipo válido.</div>
+          </div>
 
-<div class="mb-3">
-    <label for="nombres_cliente" class="form-label">
-        <i class="fas fa-user"></i> Nombres
-    </label>
-    <input type="text" class="form-control" id="nombres_cliente" name="nombres_cliente" maxlength="50" required>
-    <div class="invalid-feedback">Solo letras y espacios (máx. 50).</div>
-</div>
+          <div class="mb-3">
+            <label for="documento_cliente" class="form-label">
+              <i class="fas fa-id-badge"></i> Documento
+            </label>
+            <input type="text" class="form-control" id="documento_cliente" name="documento_cliente" maxlength="10" required>
+            <div class="valid-feedback">Perfecto.</div>
+          </div>
 
-<div class="mb-3">
-    <label for="apellidos_cliente" class="form-label">
-        <i class="fas fa-user-tag"></i> Apellidos
-    </label>
-    <input type="text" class="form-control" id="apellidos_cliente" name="apellidos_cliente" maxlength="50" required>
-    <div class="invalid-feedback">Solo letras y espacios (máx. 50).</div>
-</div>
+          <div class="mb-3">
+            <label for="nombres_cliente" class="form-label">
+              <i class="fas fa-user"></i> Nombres
+            </label>
+            <input type="text" class="form-control" id="nombres_cliente" name="nombres_cliente" maxlength="50" required>
+            <div class="valid-feedback">Correcto.</div>
+            <div class="invalid-feedback">Solo letras y espacios (máx. 50).</div>
+          </div>
 
-<div class="mb-3">
-    <label for="telefono_cliente" class="form-label">
-        <i class="fas fa-phone"></i> Teléfono
-    </label>
-    <input type="text" class="form-control" id="telefono_cliente" name="telefono_cliente" maxlength="11" required>
-    <div class="invalid-feedback">Debe contener exactamente 11 caracteres.</div>
-</div>
+          <div class="mb-3">
+            <label for="apellidos_cliente" class="form-label">
+              <i class="fas fa-user-tag"></i> Apellidos
+            </label>
+            <input type="text" class="form-control" id="apellidos_cliente" name="apellidos_cliente" maxlength="50" required>
+            <div class="valid-feedback">Correcto.</div>
+            <div class="invalid-feedback">Solo letras y espacios (máx. 50).</div>
+          </div>
 
-<div class="mb-3">
-    <label for="correo_cliente" class="form-label">
-        <i class="fas fa-envelope"></i> Correo Electrónico
-    </label>
-    <input type="email" class="form-control" id="correo_cliente" name="correo_cliente" required>
-    <div class="invalid-feedback">Ingrese un correo válido.</div>
-</div>
+          <div class="mb-3">
+            <label for="telefono_cliente" class="form-label">
+              <i class="fas fa-phone"></i> Teléfono
+            </label>
+            <input type="text" class="form-control" id="telefono_cliente" name="telefono_cliente" maxlength="11" required>
+            <div class="valid-feedback">Se ve bien.</div>
+            <div class="invalid-feedback">Debe contener exactamente 11 caracteres numéricos.</div>
+          </div>
 
-<div class="mb-3">
-    <label for="descripcion_cliente" class="form-label">
-        <i class="fas fa-align-left"></i> Descripción (Opcional)
-    </label>
-    <textarea class="form-control" id="descripcion_cliente" name="descripcion_cliente" rows="3" maxlength="100"></textarea>
-    <div class="invalid-feedback">Máximo 100 caracteres.</div>
-</div>
+          <div class="mb-3">
+            <label for="correo_cliente" class="form-label">
+              <i class="fas fa-envelope"></i> Correo Electrónico
+            </label>
+            <input type="email" class="form-control" id="correo_cliente" name="correo_cliente" required>
+            <div class="valid-feedback">Correo válido.</div>
+            <div class="invalid-feedback">Ingrese un correo válido.</div>
+          </div>
 
-<div class="modal-footer">
-    <button type="submit" class="btn btn-success">
-        <i class="fas fa-save"></i> Guardar
-    </button>
-    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-        <i class="fas fa-times"></i> Cancelar
-    </button>
-</div>
+          <div class="mb-3">
+            <label for="descripcion_cliente" class="form-label">
+              <i class="fas fa-align-left"></i> Descripción (Opcional)
+            </label>
+            <textarea class="form-control" id="descripcion_cliente" name="descripcion_cliente" rows="3" maxlength="100"></textarea>
+            <div class="valid-feedback">Ok.</div>
+            <div class="invalid-feedback">Máximo 100 caracteres.</div>
+          </div>
 
-                    </form>
-                </div>
-            </div>
-        </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-save"></i> Guardar
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
     </div>
+  </div>
+</div>
+<?php
+// Incluir automáticamente el footer al final del ciclo de vida de la petición
+// (así no tienes que hacer include en cada vista).
+if (!defined('FOOTER_AUTO')) {
+  define('FOOTER_AUTO', true);
+  register_shutdown_function(function () {
+    // __DIR__ apunta a /views  → /views/footer.php
+    include __DIR__ . '/footer.php';
+  });
+}
+?>
 
     <script src="../public/js/validacion.js"></script>
     <script src="../public/js/sweetalert2.min.js"></script>
     <script src="../public/js/bootstrap.bundle.min.js"></script>
 
+<?php
+// En header.php: asegurar sesión para leer "flash"
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+$__flashType = $_SESSION['flash_alert_type'] ?? null;
+$__flashMsg  = $_SESSION['flash_alert_msg']  ?? null;
+unset($_SESSION['flash_alert_type'], $_SESSION['flash_alert_msg']);
+?>
+<!-- SweetAlert2 local -->
+<script src="../public/js/sweetalert2.min.js"></script>
+
+<script>
+// ===== Validación modal cliente (checks en vivo) =====
+function soloNumeros(v){ return /^[0-9]+$/.test(v); }
+function soloLetrasEspacios(v){ return /^[A-Za-zÁÉÍÓÚÑáéíóúñ ]+$/.test(v); }
+function validarEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+(function initClienteModalValidation(){
+  const f    = document.getElementById('clienteForm');
+  if (!f) return;
+
+  const tipo = document.getElementById('tipo_documento_cliente');
+  const doc  = document.getElementById('documento_cliente');
+  const tel  = document.getElementById('telefono_cliente');
+  const nom  = document.getElementById('nombres_cliente');
+  const ape  = document.getElementById('apellidos_cliente');
+  const mail = document.getElementById('correo_cliente');
+  const des  = document.getElementById('descripcion_cliente');
+
+  tipo?.addEventListener('change', ()=>{
+    const ok = ['V','E','P','J'].includes(tipo.value);
+    tipo.classList.toggle('is-invalid', !ok);
+    tipo.classList.toggle('is-valid', ok);
+  });
+  doc?.addEventListener('input', ()=>{
+    const ok = soloNumeros(doc.value) && doc.value.length <= 10;
+    doc.classList.toggle('is-invalid', !ok);
+    doc.classList.toggle('is-valid', ok);
+  });
+  tel?.addEventListener('input', ()=>{
+    const ok = soloNumeros(tel.value) && tel.value.length === 11;
+    tel.classList.toggle('is-invalid', !ok);
+    tel.classList.toggle('is-valid', ok);
+  });
+  nom?.addEventListener('input', ()=>{
+    const ok = nom.value.length <= 50 && soloLetrasEspacios(nom.value);
+    nom.classList.toggle('is-invalid', !ok);
+    nom.classList.toggle('is-valid', ok);
+  });
+  ape?.addEventListener('input', ()=>{
+    const ok = ape.value.length <= 50 && soloLetrasEspacios(ape.value);
+    ape.classList.toggle('is-invalid', !ok);
+    ape.classList.toggle('is-valid', ok);
+  });
+  mail?.addEventListener('input', ()=>{
+    const ok = validarEmail(mail.value);
+    mail.classList.toggle('is-invalid', !ok);
+    mail.classList.toggle('is-valid', ok);
+  });
+  des?.addEventListener('input', ()=>{
+    const ok = des.value.length <= 100;
+    des.classList.toggle('is-invalid', !ok);
+    des.classList.toggle('is-valid', ok);
+  });
+
+  f.addEventListener('submit', (ev)=>{
+    let ok = true;
+    const vTipo = ['V','E','P','J'].includes(tipo.value); if(!vTipo){ok=false; tipo.classList.add('is-invalid');}
+    if (doc){ const v = soloNumeros(doc.value) && doc.value.length <= 10; if(!v){ok=false; doc.classList.add('is-invalid');} }
+    if (tel){ const v = soloNumeros(tel.value) && tel.value.length === 11; if(!v){ok=false; tel.classList.add('is-invalid');} }
+    if (nom){ const v = nom.value.length <= 50 && soloLetrasEspacios(nom.value); if(!v){ok=false; nom.classList.add('is-invalid');} }
+    if (ape){ const v = ape.value.length <= 50 && soloLetrasEspacios(ape.value); if(!v){ok=false; ape.classList.add('is-invalid');} }
+    if (mail){ const v = validarEmail(mail.value); if(!v){ok=false; mail.classList.add('is-invalid');} }
+    if (des){ const v = des.value.length <= 100; if(!v){ok=false; des.classList.add('is-invalid');} }
+
+    if (!ok) {
+      ev.preventDefault();
+      Swal.fire({ icon:'error', title:'Datos inválidos', text:'Revisa los campos marcados en rojo.' });
+    }
+  });
+})();
+
+// ===== SweetAlert (flash desde el servidor) =====
+(function(){
+  const type = <?= json_encode($__flashType) ?>;
+  const msg  = <?= json_encode($__flashMsg) ?>;
+  if (!type || !msg) return;
+  const icon = (type === 'success' ? 'success' :
+               (type === 'error'   ? 'error'   :
+               (type === 'warning' ? 'warning' : 'info')));
+  Swal.fire({ icon, title: msg, timer: 2200, showConfirmButton: false });
+})();
+</script>
 
 
 </body>
