@@ -97,58 +97,104 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="recepcion.php">
-                <img src="../public/img/logoPosadaRecortada.png" alt="Logo" width="200" height="75" class="d-inline-block align-text-top">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto"> <!-- Alineación a la izquierda de todos los módulos -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="recepcion.php">Recepción</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="clientesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Clientes
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="clientesDropdown">
-                            <li><a class="dropdown-item" href="./registrar.php" data-bs-toggle="modal" data-bs-target="#clienteModal">Registrar</a></li>
-                            <li><a class="dropdown-item" href="modificar.php">Modificar</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="reportes.php">Reportes</a>
-                    </li>
-                    <?php if ($rol === 'Administrador'): ?>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="recepcion.php">
+                    <img src="../public/img/logoPosadaRecortada.png" alt="Logo" width="200" height="75" class="d-inline-block align-text-top">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto"> <!-- Alineación a la izquierda de todos los módulos -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="recepcion.php">Recepción</a>
+                        </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Herramientas Administrativas
+                            <a class="nav-link dropdown-toggle" href="#" id="clientesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Clientes
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="gestionar_habitaciones.php">Gestionar Habitación</a></li>
-                            <li><a class="dropdown-item" href="gestionar_usuarios.php">Gestionar Usuarios</a></li>
-                            <!-- Agrega más ítems admin aquí -->
+                            <ul class="dropdown-menu" aria-labelledby="clientesDropdown">
+                                <li><a class="dropdown-item" href="./registrar.php" data-bs-toggle="modal" data-bs-target="#clienteModal">Registrar</a></li>
+                                <li><a class="dropdown-item" href="modificar.php">Modificar</a></li>
                             </ul>
                         </li>
-<?php endif; ?>
-                </ul>
-                <!-- Avatar y Dropdown para usuario alineado a la derecha -->
-                <ul class="navbar-nav ms-auto"> <!-- Esto alinea el módulo del usuario a la derecha -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="../public/img/imglogin.jpg" alt="User Avatar" class="rounded-circle" width="60" height="60">
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="perfil.php">Mi Perfil</a></li>
-                            <li><a class="dropdown-item" href="perfil.php">Manual de Usuario</a></li>
-                            <li><a class="dropdown-item" href="perfil.php">Copia de Seguridad</a></li>
-                            <li><a class="dropdown-item" href="../controllers/logout.php">Cerrar Sesión</a></li>
-                        </ul>
-                    </li>
-                </ul>
+                        <li class="nav-item">
+                            <a class="nav-link" href="reportes.php">Reportes</a>
+                        </li>
+                        <?php if ($rol === 'Administrador'): ?>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Herramientas Administrativas
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                <li><a class="dropdown-item" href="gestionar_habitaciones.php">Gestionar Habitación</a></li>
+                                <li><a class="dropdown-item" href="gestionar_usuarios.php">Gestionar Usuarios</a></li>
+                                <!-- Agrega más ítems admin aquí -->
+                                </ul>
+                            </li>
+    <?php endif; ?>
+                    </ul>
+            <!-- Avatar y Dropdown para usuario alineado a la derecha -->
+    <?php if (session_status() === PHP_SESSION_NONE) { session_start(); } ?>
+    <?php
+    $nombre   = $_SESSION['nombre']  ?? 'Usuario';
+    $apellido = $_SESSION['apellido']?? '';
+    $rol      = $_SESSION['rol']     ?? null; // 'Administrador' | 'Recepcionista'
+    ?>
+    <ul class="navbar-nav ms-auto">
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <img src="../public/img/imglogin.jpg" alt="User Avatar" class="rounded-circle me-2" width="60" height="60">
+
+        <?php if ($rol): ?>
+           
+        <?php endif; ?>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+        <!-- Cabecera del menú con avatar + datos -->
+        <li class="px-3 py-2">
+        <div class="d-flex flex-column align-items-center text-center">
+            <div class="fw-semibold">
+            <?php echo htmlspecialchars($nombre . ' ' . $apellido); ?>
+            </div>
+            <?php if ($rol): ?>
+            <span class="badge mt-1 <?php echo ($rol === 'Administrador') ? 'bg-primary' : 'bg-secondary'; ?>">
+                <?php echo htmlspecialchars($rol); ?>
+            </span>
+            <?php endif; ?>
+        </div>
+        </li>
+
+
+        <!-- Ítems del menú -->
+        <li>
+            <a class="dropdown-item" href="perfil.php">
+            <i class="fas fa-id-badge me-2"></i>Mi Perfil
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="perfil.php">
+            <i class="fas fa-book me-2"></i>Manual de Usuario
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="perfil.php">
+            <i class="fas fa-database me-2"></i>Copia de Seguridad
+            </a>
+        </li>
+
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <a class="dropdown-item text-danger" href="../controllers/logout.php">
+            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </a>
+        </li>
+        </ul>
+    </li>
+    </ul>
+
             </div>
         </div>
     </nav>
