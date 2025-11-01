@@ -107,7 +107,5 @@ try {
   header('Location: ../views/gestionar_usuarios.php?error=Error%20de%20base%20de%20datos');
   exit;
 }
-<<<<<<< HEAD
+
 ?>
-=======
->>>>>>> gestionar-hab-fab
