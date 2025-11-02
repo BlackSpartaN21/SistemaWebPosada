@@ -469,6 +469,8 @@ if ($esOcupada && isset($habitacion['fecha_salida'])) {
   </div>
 <?php endif; ?>
 <?php endforeach; ?>
+</div> <!-- /.row de tarjetas -->
+</div> <!-- /.container de recepcion -->
 
           
   <!-- Paginación -->
