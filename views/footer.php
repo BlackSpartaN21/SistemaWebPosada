@@ -4,6 +4,7 @@
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 ?>
 <footer class="mt-auto bg-light border-top">
+  <br>
   <div class="container-fluid py-2 px-3 px-md-5 position-relative d-flex align-items-center justify-content-between ">
 
     <!-- Izquierda: SOLO el logo -->
@@ -22,7 +23,7 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
     <div class="d-flex align-items-center gap-3">
       <span class="text-muted small">
         <i class="fa-solid fa-user-shield"></i>
-        Sesión: <?= htmlspecialchars($_SESSION['rol_usuario'] ?? 'Invitado') ?>
+        Sesión: <?= htmlspecialchars($_SESSION['rol'] ?? 'Invitado') ?>
       </span>
       <a class="text-decoration-none small" href="reportes.php">
         <i class="fa-solid fa-chart-line"></i> Reportes
@@ -30,6 +31,7 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
     </div>
 
   </div>
+  <br>
 </footer>
 
 
