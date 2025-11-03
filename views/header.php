@@ -180,7 +180,7 @@
             </a>
         </li>
         <li>
-            <a class="dropdown-item" href="perfil.php">
+            <a class="dropdown-item" href="backup.php">
             <i class="fas fa-database me-2"></i>Copia de Seguridad
             </a>
         </li>
