@@ -1,253 +1,240 @@
-<?php require_once '../config/config.php'; ?>
-<!DOCTYPE html>
+<?php
+// views/login.php
+declare(strict_types=1);
+session_start();
+
+// --- CSRF para el login
+if (empty($_SESSION['csrf_login'])) {
+  $_SESSION['csrf_login'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_login'];
+
+// --- Resolver mensaje (GET y/o flash en sesión) SOLO para modal
+$qsType  = isset($_GET['status']) ? strtolower(trim((string)$_GET['status'])) : null;
+$qsMsg   = isset($_GET['msg']) ? trim((string)$_GET['msg']) : null;
+
+$flash   = $_SESSION['flash'] ?? null;
+unset($_SESSION['flash']); // consumir flash si existe
+
+$alertType = null;
+$alertMsg  = null;
+
+if ($flash && is_array($flash) && !empty($flash['msg'])) {
+  $alertType = strtolower((string)$flash['type'] ?? 'info');
+  $alertMsg  = (string)$flash['msg'];
+} elseif (!empty($qsMsg)) {
+  $alertType = in_array($qsType, ['success','error','warning','info']) ? $qsType : 'info';
+  $alertMsg  = $qsMsg;
+}
+
+// Icono SweetAlert
+$swalIconMap = [
+  'success' => 'success',
+  'error'   => 'error',
+  'warning' => 'warning',
+  'info'    => 'info',
+];
+$swalIcon   = $swalIconMap[$alertType] ?? null;
+?>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Iniciar Sesión</title>
-  <link href="../public/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../public/css/font-awesome/css/all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesión | Posada Las Mandarinas</title>
+
+  <!-- CSS locales -->
+  <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../public/css/all.css"><!-- Font Awesome local -->
+  <link rel="stylesheet" href="../public/css/sweetalert2.min.css">
+  <link rel="stylesheet" href="../public/css/stylepaginaweb.css"><!-- opcional -->
+
   <style>
-    body {
-      background-image: url('../public/img/wallpaper3.png');
-      height: 100vh;
-    }
-    
-    .card {
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-    }
-    
-    .login-img {
-      background: linear-gradient(rgba(186, 59, 10, 0.7), rgba(154, 97, 109, 0.7)), 
-                  url('../public/img/imglogin.jpg');
-      background-size: cover;
-      background-position: center;
-      border-radius: 1rem 0 0 1rem;
-    }
-    
-    .logo-container {
-      margin-bottom: 30px;
-    }
-    
-    .logo-icon {
-      font-size: 2.5rem;
-      color: #BA3B0A;
-      background: white;
-      padding: 15px;
-      border-radius: 50%;
-      margin-right: 15px;
-    }
-    
-    .logo-text {
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: white;
-      letter-spacing: 1px;
-    }
-    
-    .form-control {
-      border-radius: 8px;
-      padding: 12px 15px;
-      font-size: 1.05rem;
-    }
-    
-    .form-control:focus {
-      border-color: #BA3B0A;
-      box-shadow: 0 0 0 0.25rem rgba(186, 59, 10, 0.25);
-    }
-    
-    .btn-login {
-      background: #BA3B0A;
-      border: none;
-      color: white;
-      padding: 12px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: 8px;
-      transition: all 0.3s;
-    }
-    
-    .btn-login:hover {
-      background: #9c3209;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(186, 59, 10, 0.3);
-    }
-    
-    .form-label {
-      font-weight: 500;
-      color: #555;
-      margin-bottom: 8px;
-    }
-    
-    .link-primary {
-      color: #BA3B0A !important;
-      text-decoration: none;
-    }
-    
-    .link-primary:hover {
-      color: #9c3209 !important;
-      text-decoration: underline;
-    }
-    
-    .divider {
+    body.login-bg {
+      min-height: 100vh;
+      background:
+        linear-gradient( rgba(0,0,0,.45), rgba(0,0,0,.45) ),
+        url('../public/img/imglogin.jpg') center/cover no-repeat fixed;
       display: flex;
       align-items: center;
-      margin: 20px 0;
+      justify-content: center;
     }
-    
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid #ddd;
+    .login-card {
+      backdrop-filter: blur(3px);
+      background: rgba(255,255,255,.9);
+      border: 0;
+      border-radius: 1rem;
+      box-shadow: 0 20px 45px rgba(0,0,0,.25);
     }
-    
-    .divider span {
-      padding: 0 15px;
-      color: #777;
-      font-size: 0.9rem;
-    }
-    
-    .footer-links {
+    .brand-top {
       display: flex;
-      justify-content: space-between;
-      margin-top: 25px;
+      align-items: center;
+      gap: .75rem;
+      justify-content: center;
+      margin-bottom: .75rem;
     }
-    
-    /* Nuevos estilos para el botón mostrar/ocultar contraseña */
-    .password-toggle {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #777;
-      z-index: 5;
-    }
-    
-    .password-container {
-      position: relative;
-    }
-    
-    /* Estilo para el botón volver */
-    .btn-volver {
-      background: #6c757d;
-      border: none;
-      color: white;
-      padding: 8px 15px;
-      font-size: 0.95rem;
-      border-radius: 5px;
-      transition: all 0.3s;
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-    
-    .btn-volver:hover {
-      background: #5a6268;
-      transform: translateY(-2px);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    }
-    
-    @media (max-width: 768px) {
-      .login-img {
-        height: 200px;
-        border-radius: 1rem 1rem 0 0;
-      }
-    }
+    .brand-top img { width: 90px; height: 90px; object-fit: contain; }
+    .brand-top h1 { font-size: 1.15rem; margin: 0; font-weight: 700; letter-spacing: .3px; color: #0d6efd; }
+    .form-control { padding-top: .7rem; padding-bottom: .7rem; }
+    .btn-primary .spinner-border { width: 1rem; height: 1rem; border-width: .15rem; }
+    .small-muted { font-size: .9rem; color: #6c757d; }
+    .login-wrapper { width: min(100%, 480px); margin: 1rem; }
   </style>
 </head>
-<body>
-  <section class="vh-100">
-    <div class="container py-5 h-100">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col col-xl-10">
-          <div class="card">
-            <div class="row g-0">
-              <!-- Imagen de fondo -->
-              <div class="col-md-6 col-lg-5 d-none d-md-flex login-img align-items-center justify-content-center">
-                <div class="text-center px-4">
-                  <h2 class="text-white mb-4">Sistema de Registro</h2>
-                  <h3 class="text-white mb-4">Posada Las Mandarinas</h3>
-                  
-                </div>
-              </div>
-              
-              <!-- Formulario -->
-              <div class="col-md-6 col-lg-7 d-flex align-items-center">
-                <div class="card-body p-4 p-lg-5 position-relative">
-                  <!-- Botón Volver modificado para redirigir a index.html -->
-                  <button type="button" class="btn btn-volver" onclick="window.location.href='../public/index.html'">
-                    <i class="fas fa-arrow-left me-1"></i> Volver
-                  </button>
-                  
-                  <form action="../controllers/validar_login.php" method="POST">
-                    <!-- Mensaje de error -->
-                    <?php if (isset($_GET['error'])): ?>
-                      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <?= htmlspecialchars($_GET['error']) ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                      </div>
-                    <?php endif; ?>
-                    
-                    <h2 class="fw-normal mb-4" style="letter-spacing: 1px; color: #444;">Inicia sesión en tu cuenta</h2>
-                    
-                    <!-- Campo de correo -->
-                    <div class="mb-4">
-                      <label for="correo" class="form-label">Correo electrónico</label>
-                      <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                        <input type="email" name="correo" class="form-control" placeholder="usuario@ejemplo.com" required>
-                      </div>
-                    </div>
-                    
-                    <!-- Campo de contraseña con botón para mostrar/ocultar -->
-                    <div class="mb-4 password-container">
-                      <label for="contrasena" class="form-label">Contraseña</label>
-                      <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                        <input type="password" name="contrasena" id="contrasena" class="form-control" placeholder="••••••••" required>
-                        <span class="password-toggle" id="togglePassword">
-                          <i class="fas fa-eye"></i>
-                        </span>
-                      </div>
-                    </div>
+<body class="login-bg">
 
-                    <!-- Botón de login -->
-                    <div class="pt-1 mb-4">
-                      <button type="submit" class="btn btn-login btn-lg w-100">
-                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
+  <main class="login-wrapper">
+    <div class="card login-card">
+      <div class="card-body p-4 p-md-5">
+
+        <div class="brand-top" aria-label="Marca del sistema">
+          <img src="../public/img/LogoPosada.png" alt="Logo Posada">
+          <h1>Posada Las Mandarinas</h1>
+        </div>
+
+        <h2 class="h5 text-center mb-4">Iniciar sesión</h2>
+
+        <!-- Formulario -->
+        <form id="formLogin" class="needs-validation" novalidate method="post" action="../controllers/login_process.php" autocomplete="on">
+          <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="correo" class="form-label">Correo</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+              <input
+                type="email"
+                class="form-control"
+                id="correo"
+                name="correo_usuario"
+                placeholder="usuario@correo.com"
+                required
+                autocomplete="username"
+                aria-describedby="correoHelp">
+              <div class="invalid-feedback">Ingresa un correo válido.</div>
+            </div>
+            <div id="correoHelp" class="form-text small-muted">Usa el correo registrado en el sistema.</div>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-2">
+            <label for="contrasena" class="form-label">Contraseña</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+              <input
+                type="password"
+                class="form-control"
+                id="contrasena"
+                name="contrasena_usuario"
+                placeholder="••••••••"
+                minlength="6"
+                required
+                autocomplete="current-password">
+              <button class="btn btn-outline-secondary" type="button" id="btnTogglePass" aria-label="Mostrar u ocultar contraseña">
+                <i class="fa-solid fa-eye-slash" id="iconEye"></i>
+              </button>
+              <div class="invalid-feedback">La contraseña es requerida (mín. 6 caracteres).</div>
             </div>
           </div>
-        </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember">
+              <label class="form-check-label small" for="remember">Recordarme</label>
+            </div>
+            <!-- <a href="#" class="small">¿Olvidaste tu contraseña?</a> -->
+          </div>
+
+          <!-- Compatibilidad con controladores antiguos -->
+          <input type="hidden" name="correo" id="mirrorCorreo">
+          <input type="hidden" name="contrasena" id="mirrorContrasena">
+
+          <button id="btnLogin" type="submit" class="btn btn-primary w-100">
+            <span class="label">Entrar</span>
+            <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+          </button>
+
+          <a href="../public/index.html" class="btn btn-outline-secondary w-100 mt-2">
+            <i class="fa-solid fa-arrow-left-long me-1"></i> Volver
+          </a>
+        </form>
+
+        <p class="text-center small-muted mt-4 mb-0">
+          © <?php echo date('Y'); ?> Posada Las Mandarinas · Todos los derechos reservados.
+        </p>
       </div>
     </div>
-  </section>
-  
+  </main>
+
+  <!-- JS locales -->
   <script src="../public/js/jquery-3.7.1.min.js"></script>
   <script src="../public/js/bootstrap.bundle.min.js"></script>
+  <script src="../public/js/sweetalert2.min.js"></script>
+
   <script>
-    // Función para mostrar/ocultar contraseña
-    $(document).ready(function() {
-      $('#togglePassword').click(function() {
-        const passwordField = $('#contrasena');
-        const passwordFieldType = passwordField.attr('type');
-        const icon = $(this).find('i');
-        
-        if (passwordFieldType === 'password') {
-          passwordField.attr('type', 'text');
-          icon.removeClass('fa-eye').addClass('fa-eye-slash');
-        } else {
-          passwordField.attr('type', 'password');
-          icon.removeClass('fa-eye-slash').addClass('fa-eye');
-        }
+    (function () {
+      'use strict';
+
+      const form  = document.getElementById('formLogin');
+      const btn   = document.getElementById('btnLogin');
+      const spin  = btn.querySelector('.spinner-border');
+      const label = btn.querySelector('.label');
+
+      // Mostrar/ocultar contraseña
+      const btnToggle = document.getElementById('btnTogglePass');
+      const inputPass = document.getElementById('contrasena');
+      const iconEye   = document.getElementById('iconEye');
+
+      btnToggle.addEventListener('click', function () {
+        const isPass = inputPass.getAttribute('type') === 'password';
+        inputPass.setAttribute('type', isPass ? 'text' : 'password');
+        iconEye.classList.toggle('fa-eye');
+        iconEye.classList.toggle('fa-eye-slash');
       });
-    });
+
+      // Mirror de nombres para compatibilidad
+      const correo = document.getElementById('correo');
+      const contr  = document.getElementById('contrasena');
+      const mCorr  = document.getElementById('mirrorCorreo');
+      const mCont  = document.getElementById('mirrorContrasena');
+
+      function syncMirrors() {
+        mCorr.value = correo.value;
+        mCont.value = contr.value;
+      }
+      correo.addEventListener('input', syncMirrors);
+      contr.addEventListener('input', syncMirrors);
+      syncMirrors();
+
+      // Validación Bootstrap + evitar doble envío
+      form.addEventListener('submit', function (e) {
+        if (!form.checkValidity()) {
+          e.preventDefault();
+          e.stopPropagation();
+          form.classList.add('was-validated');
+          return;
+        }
+        btn.disabled = true;
+        spin.classList.remove('d-none');
+        label.textContent = 'Entrando...';
+      }, false);
+
+      // ÚNICA alerta: SweetAlert si viene mensaje del servidor
+      <?php if (!empty($alertMsg) && !empty($swalIcon)): ?>
+      Swal.fire({
+        icon: <?php echo json_encode($swalIcon, JSON_UNESCAPED_UNICODE); ?>,
+        title: {
+          success: '¡Listo!',
+          error:   'Ups...',
+          warning: 'Atención',
+          info:    'Información'
+        }[<?php echo json_encode($swalIcon, JSON_UNESCAPED_UNICODE); ?>],
+        text: <?php echo json_encode($alertMsg, JSON_UNESCAPED_UNICODE); ?>,
+        confirmButtonText: 'Aceptar'
+      });
+      <?php endif; ?>
+    })();
   </script>
 </body>
 </html>

@@ -116,7 +116,7 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="clientesDropdown">
                                 <li><a class="dropdown-item" href="./registrar.php" data-bs-toggle="modal" data-bs-target="#clienteModal">Registrar</a></li>
-                                <li><a class="dropdown-item" href="modificar.php">Modificar</a></li>
+                                <li><a class="dropdown-item" href="modificar.php">Listar</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">
@@ -130,6 +130,7 @@
                                 <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                                 <li><a class="dropdown-item" href="gestionar_habitaciones.php">Gestionar Habitación</a></li>
                                 <li><a class="dropdown-item" href="gestionar_usuarios.php">Gestionar Usuarios</a></li>
+                                <li><a class="dropdown-item" href="bitacora.php">Bitacora</a></li>
                                 <!-- Agrega más ítems admin aquí -->
                                 </ul>
                             </li>

@@ -946,6 +946,308 @@ section[data-id="2b9a70c"] .wpr-pricing-table-button button::after{ content:none
 
 /* Por si acaso: quita márgenes del body */
 html, body{ height:100%; margin:0; }
+<!-- jQuery (si no está ya cargado en index.html) -->
+<script src="./public/js/jquery-3.7.1.min.js"></script>
+
+<style>
+  .res-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:9998}
+  .res-modal{position:fixed;inset:0;display:none;place-items:center;z-index:9999}
+  .res-card{width:min(920px,95vw);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.2);border:2px solid #BA3B0A}
+  .res-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #eee}
+  .res-ttl{font-weight:700;color:#BA3B0A;margin:0}
+  .res-x{border:none;background:transparent;font-size:22px;cursor:pointer;line-height:1}
+  .res-bd{padding:18px}
+  .res-steps{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+  .res-step{padding:6px 10px;border-radius:999px;border:1px solid #ddd;font-size:13px;color:#444}
+  .res-step.active{background:#BA3B0A;color:#fff;border-color:#BA3B0A}
+  .res-actions{display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid #eee}
+  .res-btn{cursor:pointer;border:none;border-radius:10px;padding:10px 14px;font-weight:600}
+  .res-btn.primary{background:#BA3B0A;color:#fff}
+  .res-btn.ghost{background:#f3f3f3}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .f{display:flex;flex-direction:column;gap:6px}
+  .f label{font-weight:600}
+  .rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .room{border:1px solid #ddd;border-radius:10px;padding:10px}
+  .room.selected{border-color:#BA3B0A;box-shadow:0 0 0 2px rgba(186,59,10,.15)}
+  @media (max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}
+</style>
+
+<div id="resOverlay" class="res-overlay"></div>
+<div id="resModal" class="res-modal" role="dialog" aria-modal="true" aria-labelledby="resTitle">
+  <div class="res-card">
+    <div class="res-hd">
+      <h3 id="resTitle" class="res-ttl">Reserva en Posada Las Mandarinas</h3>
+      <button class="res-x" id="resClose" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="res-bd">
+      <div class="res-steps">
+        <span class="res-step" data-step="1">1. Ver disponibilidad</span>
+        <span class="res-step" data-step="2">2. Seleccionar habitación</span>
+        <span class="res-step" data-step="3">3. Completar datos</span>
+        <span class="res-step" data-step="4">4. Confirmación</span>
+      </div>
+
+      <!-- Step 1 -->
+      <section id="step1" class="step">
+        <div class="grid-3">
+          <div class="f">
+            <label>Tipo de habitación</label>
+            <select id="tipoHabitacion"></select>
+          </div>
+          <div class="f">
+            <label>Tarifa</label>
+            <select id="tipoTarifa"></select>
+          </div>
+          <div class="f">
+            <label>Personas</label>
+            <input id="cantPersonas" type="number" min="1" value="1">
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="f">
+            <label>Fecha y hora de llegada</label>
+            <input id="fechaLlegada" type="datetime-local">
+          </div>
+          <div class="f">
+            <label>Fecha y hora de salida</label>
+            <input id="fechaSalida" type="datetime-local">
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section id="step2" class="step" style="display:none">
+        <div class="f">
+          <label>Disponibilidad encontrada</label>
+          <div id="rooms" class="rooms"></div>
+        </div>
+        <div class="f" style="margin-top:12px">
+          <label>Resumen</label>
+          <div id="resumenPrecio"></div>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section id="step3" class="step" style="display:none">
+        <div class="grid-3">
+          <div class="f">
+            <label>Tipo doc.</label>
+            <select id="cliTipo"><option>V</option><option>E</option><option>P</option><option>J</option></select>
+          </div>
+          <div class="f">
+            <label>Documento</label>
+            <input id="cliDoc" placeholder="Ej: 12345678">
+          </div>
+          <div class="f">
+            <label>Teléfono</label>
+            <input id="cliTel">
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="f">
+            <label>Nombres</label>
+            <input id="cliNom">
+          </div>
+          <div class="f">
+            <label>Apellidos</label>
+            <input id="cliApe">
+          </div>
+        </div>
+        <div class="f" style="margin-top:12px">
+          <label>Correo</label>
+          <input id="cliCorreo" type="email">
+        </div>
+        <div class="f" style="margin-top:12px">
+          <label>Observaciones (opcional)</label>
+          <textarea id="obs" rows="2"></textarea>
+        </div>
+      </section>
+
+      <!-- Step 4 -->
+      <section id="step4" class="step" style="display:none">
+        <div id="confirmacionBox">
+          <h4>¡Solicitud enviada!</h4>
+          <p id="confirmacionMsg">Estamos registrando tu reserva…</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="res-actions">
+      <button class="res-btn ghost" id="btnAtras">Atrás</button>
+      <button class="res-btn primary" id="btnSiguiente">Ver disponibilidad</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  const el = {
+    overlay: $('#resOverlay'),
+    modal:   $('#resModal'),
+    close:   $('#resClose'),
+    btnOpen: document.getElementById('btnAbrirReserva') || document.querySelector('[data-open="reservar"]'),
+    btnNext: $('#btnSiguiente'),
+    btnPrev: $('#btnAtras'),
+    steps:   $$('.res-step'),
+    s1:      $('#step1'), s2: $('#step2'), s3: $('#step3'), s4: $('#step4'),
+    tipo:    $('#tipoHabitacion'), tarifa: $('#tipoTarifa'), personas: $('#cantPersonas'),
+    fIn:     $('#fechaLlegada'), fOut: $('#fechaSalida'),
+    rooms:   $('#rooms'), resumen: $('#resumenPrecio'),
+    cliTipo: $('#cliTipo'), cliDoc: $('#cliDoc'), cliTel: $('#cliTel'),
+    cliNom:  $('#cliNom'),  cliApe: $('#cliApe'), cliCorreo: $('#cliCorreo'),
+    obs:     $('#obs'), confirmMsg: $('#confirmacionMsg')
+  };
+
+  const API = {
+    base: './controllers/public_reservas.php',
+    async tipos() {
+      const r = await fetch(`${this.base}?action=tipos`);
+      return r.json();
+    },
+    async disponibilidad(payload) {
+      const r = await fetch(`${this.base}?action=disponibilidad`, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      });
+      return r.json();
+    },
+    async crear(payload) {
+      const r = await fetch(`${this.base}?action=crear`, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      });
+      return r.json();
+    }
+  };
+
+  let state = {
+    step: 1,
+    tipos: [],
+    tarifasPorTipo: {},
+    capacidadPorTipo: {},
+    disponibilidad: [],
+    selecHab: null,
+    resumen: { total: 0, bloques: 0, unidad: '' }
+  };
+
+  function open(){ el.overlay.style.display='block'; el.modal.style.display='grid'; go(1); loadTipos(); }
+  function close(){ el.overlay.style.display='none'; el.modal.style.display='none'; }
+  function markStep(n){ el.steps.forEach(s => s.classList.toggle('active', parseInt(s.dataset.step,10)===n)); }
+  function show(n){ [el.s1,el.s2,el.s3,el.s4].forEach((s,i)=> s.style.display = (i+1===n)?'block':'none'); markStep(n); state.step=n;
+    el.btnPrev.style.display = (n===1)?'none':'inline-block';
+    el.btnNext.textContent = (n===1)?'Ver disponibilidad' : (n===2)?'Continuar' : (n===3)?'Enviar' : 'Cerrar';
+  }
+
+  function go(n){ show(n); }
+  function next(){
+    if (state.step===1) return step1();
+    if (state.step===2) return step2();
+    if (state.step===3) return step3();
+    if (state.step===4) return close();
+  }
+  function prev(){ if (state.step>1) show(state.step-1); }
+
+  async function loadTipos(){
+    try{
+      const data = await API.tipos();
+      state.tipos = data.tipos || [];
+      state.tarifasPorTipo = data.tarifas || {};
+      state.capacidadPorTipo = data.capacidades || {};
+      el.tipo.innerHTML = state.tipos.map(t=>`<option value="${t.id}">${t.nombre}</option>`).join('');
+      refreshTarifas();
+    }catch(e){ console.error(e); }
+  }
+  function refreshTarifas(){
+    const id = el.tipo.value;
+    const arr = state.tarifasPorTipo[id] || [];
+    el.tarifa.innerHTML = arr.map(t=>`<option value="${t.tipo}">${t.tipo} – $${t.precio}</option>`).join('');
+    const cap = state.capacidadPorTipo[id] || 1;
+    el.personas.setAttribute('max', cap);
+    if (parseInt(el.personas.value,10)>cap) el.personas.value = cap;
+  }
+  el.tipo.addEventListener('change', refreshTarifas);
+
+  async function step1(){
+    // Validaciones mínimas
+    const payload = {
+      id_tipo: parseInt(el.tipo.value,10),
+      tipo_tarifa: el.tarifa.value,
+      personas: parseInt(el.personas.value,10),
+      llegada: el.fIn.value, salida: el.fOut.value
+    };
+    if (!payload.llegada || !payload.salida) return alert('Indica llegada y salida.');
+    if (new Date(payload.salida) <= new Date(payload.llegada)) return alert('La salida debe ser mayor que la llegada.');
+
+    const r = await API.disponibilidad(payload);
+    if (!r.ok) { alert(r.msg||'Error consultando disponibilidad'); return; }
+    state.disponibilidad = r.data || [];
+    state.resumen = r.resumen || { total:0, bloques:0, unidad:'' };
+    el.rooms.innerHTML = state.disponibilidad.length
+      ? state.disponibilidad.map(h => `
+          <label class="room">
+            <input type="radio" name="hab" value="${h.id}" style="margin-right:6px">
+            <strong>Hab. ${h.nombre}</strong><br>
+            ${h.tipo} • Cap: ${h.capacidad}
+          </label>
+        `).join('')
+      : `<div>No hay habitaciones disponibles para ese rango.</div>`;
+    el.resumen.innerHTML = `Total estimado: <strong>$${state.resumen.total}</strong> (${state.resumen.bloques} ${state.resumen.unidad})`;
+    show(2);
+  }
+
+  function step2(){
+    const checked = el.rooms.querySelector('input[name="hab"]:checked');
+    if (!checked) return alert('Selecciona una habitación.');
+    state.selecHab = parseInt(checked.value,10);
+    show(3);
+  }
+
+  async function step3(){
+    const c = {
+      tipo: el.cliTipo.value.trim(),
+      doc: el.cliDoc.value.trim(),
+      tel: el.cliTel.value.trim(),
+      nom: el.cliNom.value.trim(),
+      ape: el.cliApe.value.trim(),
+      email: el.cliCorreo.value.trim(),
+      obs: el.obs.value.trim()
+    };
+    if (!c.doc || !c.nom || !c.ape) return alert('Documento, nombres y apellidos son obligatorios.');
+    const payload = {
+      id_habitacion: state.selecHab,
+      id_tipo: parseInt(el.tipo.value,10),
+      tipo_tarifa: el.tarifa.value,
+      personas: parseInt(el.personas.value,10),
+      llegada: el.fIn.value, salida: el.fOut.value,
+      cliente: c
+    };
+    el.btnNext.disabled = true;
+    const r = await API.crear(payload).catch(()=>({ok:false,msg:'Error de red'}));
+    el.btnNext.disabled = false;
+    show(4);
+    if (r.ok){
+      el.confirmMsg.innerHTML = `Código de solicitud: <strong>${r.codigo}</strong><br>
+      Estado: <strong>${r.estado}</strong><br>
+      Te contactaremos para confirmar.`;
+    } else {
+      el.confirmMsg.textContent = r.msg || 'No se pudo crear la reserva.';
+    }
+  }
+
+  el.btnNext.addEventListener('click', next);
+  el.btnPrev.addEventListener('click', prev);
+  (el.btnOpen||document.body).addEventListener('click', e=>{
+    if (e.target===el.btnOpen || (e.target.closest && e.target.closest('#btnAbrirReserva'))) { e.preventDefault(); open(); }
+  });
+  el.overlay.addEventListener('click', close);
+  el.close.addEventListener('click', close);
+})();
+</script>
+
 
 </style>
 <div class="" data-element_type="container" id="lm-top">
@@ -959,7 +1261,10 @@ html, body{ height:100%; margin:0; }
   <li><a href="#habitaciones">Tarifas</a></li>
   <li><a href="#ubicacion" id="ubicacion-btn">Ubicación</a></li>
   <li><a href="https://wa.me/584264731506">Contacto</a></li>
-  <li class="reservar"><a href="#reserva">Reservar</a></li>
+  <li class="reservar">
+  <a href="#reserva" id="btnAbrirReserva">Reservar</a>
+</li>
+
 </ul>
 </nav>
 </header>
@@ -1014,136 +1319,10 @@ y nuestras instalaciones.</p> </h6>
 <div class="elementor-element elementor-element-297d086 e-flex e-con-boxed wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child" data-element_type="container" data-id="297d086">
 <div class="e-con-inner">
 <div class="elementor-element elementor-element-67574ea elementor-widget elementor-widget-heading" data-element_type="widget" data-id="67574ea" data-widget_type="heading.default">
-<div class="elementor-widget-container">
-<h2 class="elementor-heading-title elementor-size-default" id="reserva">Solicita tu hospedaje con este formulario de reserva</h2> </div>
-</div>
-<div class="elementor-element elementor-element-460ac41 elementor-button-align-stretch elementor-widget elementor-widget-form" data-element_type="widget" data-id="460ac41" data-settings='{"step_next_label":"Next","step_previous_label":"Previous","button_width":"100","step_type":"number_text","step_icon_shape":"circle"}' data-widget_type="form.default">
-<div class="elementor-widget-container">
-<form class="elementor-form" id="formdereserva" method="post" name="New Form">
-<input name="post_id" type="hidden" value="22"/>
-<input name="form_id" type="hidden" value="460ac41"/>
-<input name="referer_title" type="hidden" value="Posada Mérida Vacacional | Hospedaje cerca del Centro"/>
-<input name="queried_id" type="hidden" value="22"/>
-<div class="elementor-form-fields-wrapper elementor-labels-above">
-<div class="elementor-field-type-text elementor-field-group elementor-column elementor-field-group-name elementor-col-100 elementor-field-required">
-<label class="elementor-field-label" for="form-field-name">
-								Nombre y Apellido 							</label>
-<input aria-required="true" class="elementor-field elementor-size-sm elementor-field-textual" id="form-field-name" name="form_fields[name]" placeholder="Nombre y Apellido" required="required" size="1" type="text"/>
-</div>
-<div class="elementor-field-type-tel elementor-field-group elementor-column elementor-field-group-field_87b7282 elementor-col-100">
-<label class="elementor-field-label" for="form-field-field_87b7282">
-								Número Whastapp							</label>
-<input class="elementor-field elementor-size-sm elementor-field-textual" id="form-field-field_87b7282" name="form_fields[field_87b7282]" pattern="[0-9()#&amp;+*-=.]+" placeholder="Número Whatsapp" size="1" title="Only numbers and phone characters (#, -, *, etc) are accepted." type="tel"/>
-</div>
-<div class="elementor-field-type-email elementor-field-group elementor-column elementor-field-group-email elementor-col-100 elementor-field-required">
-<label class="elementor-field-label" for="form-field-email">
-								Correo electrónico 							</label>
-<input aria-required="true" class="elementor-field elementor-size-sm elementor-field-textual" id="form-field-email" name="form_fields[email]" placeholder="Correo electrónico" required="required" size="1" type="email"/>
-</div>
-<div class="elementor-field-type-date elementor-field-group elementor-column elementor-field-group-field_189e594 elementor-col-50">
-<label class="elementor-field-label" for="form-field-field_189e594">
-								Fecha de entrada 							</label>
-<input class="elementor-field elementor-size-sm elementor-field-textual elementor-date-field" id="form-field-field_189e594" max="2024-12-31" min="2023-05-15" name="form_fields[field_189e594]" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="día/mes/año" type="date"/>
-</div>
-<div class="elementor-field-type-date elementor-field-group elementor-column elementor-field-group-field_25a93af elementor-col-50">
-<label class="elementor-field-label" for="form-field-field_25a93af">
-								Fecha de salida							</label>
-<input class="elementor-field elementor-size-sm elementor-field-textual elementor-date-field" id="form-field-field_25a93af" max="2024-12-31" min="2023-05-15" name="form_fields[field_25a93af]" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="día/mes/año" type="date"/>
-</div>
-<div class="elementor-field-type-number elementor-field-group elementor-column elementor-field-group-message elementor-col-50 elementor-field-required">
-<label class="elementor-field-label" for="form-field-message">
-								Cantidad de adultos							</label>
-<input aria-required="true" class="elementor-field elementor-size-sm elementor-field-textual" id="form-field-message" max="130" min="2" name="form_fields[message]" placeholder="Adultos " required="required" type="number"/>
-</div>
-<div class="elementor-field-type-number elementor-field-group elementor-column elementor-field-group-field_a39ef49 elementor-col-50 elementor-field-required">
-<label class="elementor-field-label" for="form-field-field_a39ef49">
-								Cantidad de niños							</label>
-<input aria-required="true" class="elementor-field elementor-size-sm elementor-field-textual" id="form-field-field_a39ef49" max="130" min="2" name="form_fields[field_a39ef49]" placeholder="Niños" required="required" type="number"/>
-</div>
-<div class="elementor-field-type-select elementor-field-group elementor-column elementor-field-group-field_6d9ab0a elementor-col-100">
-<label class="elementor-field-label" for="form-field-field_6d9ab0a">
-								Habitación							</label>
-<div class="elementor-field elementor-select-wrapper remove-before">
-<div class="select-caret-down-wrapper">
-<i aria-hidden="true" class="eicon-caret-down"></i> </div>
-<select class="elementor-field-textual elementor-size-sm" id="form-field-field_6d9ab0a" name="form_fields[field_6d9ab0a]">
-<option value="Alojamiento y paquete turístico ">Individual </option>
-<option value="Traslados y alojamiento">Matrimonial</option>
-<option value="Todo incluido ">Triple </option>
-</select>
-</div>
-</div>
-<div class="elementor-field-type-select elementor-field-group elementor-column elementor-field-group-field_36904c6 elementor-col-100">
-<label class="elementor-field-label" for="form-field-field_36904c6">
-								Tipo de hospedaje							</label>
-<div class="elementor-field elementor-select-wrapper remove-before">
-<div class="select-caret-down-wrapper">
-<i aria-hidden="true" class="eicon-caret-down"></i> </div>
-<select class="elementor-field-textual elementor-size-sm" id="form-field-field_36904c6" name="form_fields[field_36904c6]">
-<option value="Habitación">Por hora</option>
-<option value="Apartamento">Por noche</option>
-</select>
-</div>
-</div>
-<div class="elementor-field-type-recaptcha elementor-field-group elementor-column elementor-field-group-field_7c7bb7a elementor-col-100">
-<div class="elementor-field" id="form-field-field_7c7bb7a"></div> </div>
-<div class="elementor-field-group elementor-column elementor-field-type-submit elementor-col-100 e-form__buttons">
-<button class="elementor-button elementor-size-sm" type="submit">
-<span class="elementor-button-content-wrapper">
-<span class="elementor-button-text">Enviar información</span>
-</span>
-</button>
-</div>
-</div>
-</form>
-</div>
-</div>
-</div>
-</div>
-<div class="elementor-element elementor-element-1804abf e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child" data-element_type="container" data-id="1804abf">
-<div class="elementor-element elementor-element-5faaed8 elementor-widget elementor-widget-heading" data-element_type="widget" data-id="5faaed8" data-widget_type="heading.default">
-<div class="elementor-widget-container">
-<h2 class="elementor-heading-title elementor-size-default">Reserva con los mejores precios </h2> </div>
-</div>
-<div class="elementor-element elementor-element-06dd268 elementor-widget elementor-widget-heading" data-element_type="widget" data-id="06dd268" data-widget_type="heading.default">
-<div class="elementor-widget-container">
-<span class="elementor-heading-title elementor-size-default">Pasos para reservar en la Posada Turistica Las Mandarinas</span> </div>
-</div>
-<div class="elementor-element elementor-element-1a5ca48 elementor-align-left elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list no-icons-centered-left" data-element_type="widget" data-id="1a5ca48" data-widget_type="icon-list.default">
-<div class="elementor-widget-container">
-<ul class="elementor-icon-list-items">
-<li class="elementor-icon-list-item">
-<a href="#descripcion" target="_blank">
-<span class="elementor-icon-list-text">1. Visita y conoce nuestros servicios </span>
-</a>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">2. Escoge tu servicio favorito de nuestra Posada</span>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">3. Visita el apartado de reserva </span>
-</a>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">4. Llena nuestro formulario de reserva para cotizar la disponibilidad y precio de nuestros servicios</span>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">5. Envía tu formulario y espera a nuestra breve respuesta vía WhatsApp y/o  correo electrónico </span>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">6. Aclara por privado tus requerimientos y solicitudes. (Por ej. iremos 4 personas con mucho equipaje)</span>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">6. Reserva con un pago móvil o personalmente.</span>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">7. Confirma tu asistencia 2 días antes de tu llegada.</span>
-</li>
-<li class="elementor-icon-list-item">
-<span class="elementor-icon-list-text">7. ¡Listo! ¡Tu reserva ha sido confirmada! Esperamos tu llegada a Posada Turística Las Mandarinas</span>
-</li>
-</ul>
-</div>
+
+
+
+
 </div>
 </div>
 </div>
@@ -1781,7 +1960,21 @@ y nuestras instalaciones.</p> </h6>
 </div>
 </footer>
 <script src="js/script.js"></script>
+<script>
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('#btnAbrirReserva,[data-open="reservar"]');
+  if (!btn) return;
+  e.preventDefault();
+  const overlay = document.getElementById('resOverlay');
+  const modal   = document.getElementById('resModal');
+  if (!overlay || !modal) return alert('Falta insertar la modal en el HTML.');
+  overlay.style.display = 'block';
+  modal.style.display   = 'grid';
+});
+</script>
+
 </body>
+
 </html>
 <link href="https://posadameridavacacional.com/wp-content/plugins/elementor/assets/lib/flatpickr/flatpickr.min.css?ver=4.6.13" id="flatpickr-css" media="all" rel="stylesheet"/>
 <link href="https://posadameridavacacional.com/wp-content/plugins/creame-whatsapp-me/public/css/joinchat.min.css?ver=6.0.6" id="joinchat-css" media="all" rel="stylesheet"/>

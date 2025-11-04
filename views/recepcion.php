@@ -8,6 +8,8 @@ if (!isset($_SESSION['id_usuario'])) {
 include '../config/db.php'; // Conexión a la base de datos
 include '../views/header.php';
 
+
+
 // Configuración de paginación
 $habitacionesPorPagina = 6;
 $paginaActual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
@@ -79,6 +81,77 @@ $metodosPago = $stmtMetodosPago->fetchAll(PDO::FETCH_ASSOC);
     die("Error al obtener habitaciones: " . $e->getMessage());
 }
 ?>
+<?php
+// === Constantes de estado (ajústalas si tu app usa otras) ===
+// 1 = Disponible, 0 = Ocupada/No disponible (por compatibilidad actual en tu recepcion.php),
+// 3 = Deshabilitada (no disponible), 4 = Esperando vaciar (sucia, pendiente limpieza)
+const EST_DISPONIBLE       = 1;
+const EST_NO_DISPONIBLE    = 0; // ocupada
+const EST_DESHABILITADA    = 3; // no disponible
+const EST_ESPERANDO_VACIAR = 4; // pendiente de vaciar/limpieza
+
+// Endpoint AJAX simple: recepcion.php?ajax=hab_stats
+if (isset($_GET['ajax']) && $_GET['ajax'] === 'hab_stats') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        $stmt = $pdo->query("
+            SELECT
+              COUNT(*)                                                   AS total,
+              SUM(estado_habitacion = " . EST_DISPONIBLE . ")            AS disponibles,
+              SUM(estado_habitacion = " . EST_NO_DISPONIBLE . ") AS no_disponibles,
+              /* CORREGIDO: calcular 'esperando_vaciar' como ocupada + reserva confirmada vencida */
+              SUM(
+                estado_habitacion = " . EST_NO_DISPONIBLE . " 
+                AND EXISTS (
+                  SELECT 1
+                  FROM reservas r
+                  WHERE r.id_habitacion = habitaciones.id_habitacion
+                    AND r.estado_reserva = 'Confirmada'
+                    AND r.fecha_salida <= NOW()
+                )
+              ) AS esperando_vaciar
+            FROM habitaciones
+        ");
+        $stats = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['total'=>0,'disponibles'=>0,'no_disponibles'=>0,'esperando_vaciar'=>0];
+        echo json_encode([
+            'ok' => true,
+            'total' => (int)$stats['total'],
+            'disponibles' => (int)$stats['disponibles'],
+            'no_disponibles' => (int)$stats['no_disponibles'],
+            'esperando_vaciar' => (int)$stats['esperando_vaciar'],
+        ]);
+    } catch (Throwable $e) {
+        echo json_encode(['ok'=>false, 'error'=>$e->getMessage()]);
+    }
+    exit;
+}
+
+// Carga inicial (render del lado servidor)
+try {
+    $stmt = $pdo->query("
+        SELECT
+          COUNT(*)                                                   AS total,
+          SUM(estado_habitacion = " . EST_DISPONIBLE . ")            AS disponibles,
+          SUM(estado_habitacion = " . EST_NO_DISPONIBLE . ") AS no_disponibles,
+          /* CORREGIDO: calcular 'esperando_vaciar' como ocupada + reserva confirmada vencida */
+          SUM(
+            estado_habitacion = " . EST_NO_DISPONIBLE . " 
+            AND EXISTS (
+              SELECT 1
+              FROM reservas r
+              WHERE r.id_habitacion = habitaciones.id_habitacion
+                AND r.estado_reserva = 'Confirmada'
+                AND r.fecha_salida <= NOW()
+            )
+          ) AS esperando_vaciar
+        FROM habitaciones
+    ");
+    $HAB_STATS = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['total'=>0,'disponibles'=>0,'no_disponibles'=>0,'esperando_vaciar'=>0];
+} catch (Throwable $e) {
+    $HAB_STATS = ['total'=>0,'disponibles'=>0,'no_disponibles'=>0,'esperando_vaciar'=>0];
+}
+?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -135,6 +208,60 @@ $metodosPago = $stmtMetodosPago->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 </div>
+<!-- Leyenda / Resumen de habitaciones -->
+<div class="row g-3 mb-4" id="legendHabitaciones">
+  <!-- Totales -->
+  <div class="col-6 col-md-3">
+    <div class="card border-primary h-100 shadow-sm">
+      <div class="card-body d-flex align-items-center">
+        <i class="fas fa-bed fa-2x me-3 text-primary"></i>
+        <div>
+          <div class="small text-muted">Habitaciones totales</div>
+          <div class="h4 mb-0" id="totales"><?= (int)$HAB_STATS['total'] ?></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Disponibles -->
+  <div class="col-6 col-md-3">
+    <div class="card border-success h-100 shadow-sm">
+      <div class="card-body d-flex align-items-center">
+        <i class="fas fa-door-open fa-2x me-3 text-success"></i>
+        <div>
+          <div class="small text-muted">Disponibles</div>
+          <div class="h4 mb-0" id="disponibles"><?= (int)$HAB_STATS['disponibles'] ?></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- No disponibles (ocupadas + deshabilitadas) -->
+  <div class="col-6 col-md-3">
+    <div class="card border-danger h-100 shadow-sm">
+      <div class="card-body d-flex align-items-center">
+        <i class="fas fa-ban fa-2x me-3 text-danger"></i>
+        <div>
+          <div class="small text-muted">Ocupadas</div>
+          <div class="h4 mb-0" id="no_disponibles"><?= (int)$HAB_STATS['no_disponibles'] ?></div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Esperando vaciar -->
+  <div class="col-6 col-md-3">
+    <div class="card border-warning h-100 shadow-sm">
+      <div class="card-body d-flex align-items-center">
+        <i class="fas fa-broom fa-2x me-3 text-warning"></i>
+        <div>
+          <div class="small text-muted">Esperando vaciar</div>
+          <div class="h4 mb-0" id="esperando_vaciar"><?= (int)$HAB_STATS['esperando_vaciar'] ?></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
           <h2 class="text-center">Listado de Habitaciones</h2><br>
           <div class="row">
@@ -664,5 +791,31 @@ actualizarPrecioYTotal<?php echo $id; ?>();
 });
 </script>
 
+<script>
+(function () {
+  async function refreshHabStats() {
+    try {
+      const res = await fetch('recepcion.php?ajax=hab_stats', { cache: 'no-store' });
+      const json = await res.json();
+      if (!json || json.ok !== true) return;
+      const map = {
+        totales: json.total ?? 0,
+        disponibles: json.disponibles ?? 0,
+        no_disponibles: json.no_disponibles ?? 0,
+        esperando_vaciar: json.esperando_vaciar ?? 0
+      };
+      Object.entries(map).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      });
+    } catch (e) {
+      // Silencioso; no romper UI si falla
+    }
+  }
+  // Primera actualización pasados 2s y luego cada 30s
+  setTimeout(refreshHabStats, 2000);
+  setInterval(refreshHabStats, 30000);
+})();
+</script>
 
 </html>

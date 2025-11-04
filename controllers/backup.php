@@ -34,6 +34,11 @@ if (!$loaded) {
   exit;
 }
 
+// --- Bitácora (opcional si hay PDO) ---
+$bitacoraLoaded = false;
+$bitacoraPath   = __DIR__ . '/../config/bitacora.php';
+if (is_file($bitacoraPath)) { require_once $bitacoraPath; $bitacoraLoaded = true; }
+
 // --- Detectar tipo de conexión (estricto) ---
 $pdo    = (isset($pdo)    && $pdo    instanceof PDO)    ? $pdo    : null;   // PDO válido
 $conn   = (isset($conn)   && $conn   instanceof mysqli) ? $conn   : null;   // MySQLi válido
@@ -43,6 +48,13 @@ if (!$pdo && !$conn && !$mysqli) {
   http_response_code(500);
   echo json_encode(['ok' => false, 'msg' => 'No hay conexión activa válida: ni PDO ni MySQLi']);
   exit;
+}
+
+// --- Helper seguro para bitácora ---
+function log_bita($pdo, bool $bitacoraLoaded, string $accion, array $detalle = [], string $resultado = 'OK'): void {
+  if ($bitacoraLoaded && $pdo instanceof PDO) {
+    try { bitacora_log($pdo, 'Backups', $accion, $detalle, $resultado); } catch (Throwable $e) { /* noop */ }
+  }
 }
 
 // --- Utilidades para adaptadores ---
@@ -122,12 +134,14 @@ $backupDir = __DIR__ . '/backups';
 if (!is_dir($backupDir)) {
   if (!@mkdir($backupDir, 0775, true)) {
     http_response_code(500);
+    log_bita($pdo, $bitacoraLoaded, 'create', ['error' => 'mkdir_failed', 'dir' => $backupDir], 'ERROR');
     echo json_encode(['ok' => false, 'msg' => 'No se pudo crear la carpeta de backups en: ' . $backupDir]);
     exit;
   }
 }
 if (!is_writable($backupDir)) {
   http_response_code(500);
+  log_bita($pdo, $bitacoraLoaded, 'create', ['error' => 'dir_not_writable', 'dir' => $backupDir], 'ERROR');
   echo json_encode(['ok' => false, 'msg' => 'La carpeta no es escribible: ' . $backupDir]);
   exit;
 }
@@ -203,7 +217,7 @@ function exportDatabase($dbName, $pdo, $conn, $mysqli): string {
   else { $link = getMysqli($conn, $mysqli); $link->query('SET FOREIGN_KEY_CHECKS=1'); }
 
   $dump .= "COMMIT;\n";
-  $dump .= "/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET */;\n";
+  $dump .= "/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n";
   $dump .= "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n";
   $dump .= "/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n";
 
@@ -221,10 +235,13 @@ try {
       $sql = exportDatabase($dbName, $pdo, $conn, $mysqli);
       $fileName = "{$dbName}_" . nowYmdHis() . ".sql";
       $fileAbs  = $backupDir . '/' . $fileName;
-      if (file_put_contents($fileAbs, $sql) === false)
+      if (file_put_contents($fileAbs, $sql) === false) {
+        log_bita($pdo, $bitacoraLoaded, 'crear', ['db' => $dbName, 'file' => $fileName, 'dir' => $backupDir, 'motivo' => 'write_failed'], 'ERROR');
         echo json_encode(['ok' => false, 'msg' => 'No se pudo escribir el archivo en: ' . $fileAbs]);
-      else
+      } else {
+        log_bita($pdo, $bitacoraLoaded, 'crear', ['db' => $dbName, 'file' => $fileName], 'OK');
         echo json_encode(['ok' => true, 'msg' => 'Copia creada', 'file' => $fileName, 'path' => $fileAbs]);
+      }
       break;
 
     case 'list':
@@ -232,24 +249,39 @@ try {
       foreach (glob($backupDir . '/*.sql') as $f)
         $files[] = ['name' => basename($f), 'size' => filesize($f), 'mtime' => filemtime($f)];
       usort($files, fn($a,$b) => $b['mtime'] <=> $a['mtime']);
+      log_bita($pdo, $bitacoraLoaded, 'listar', ['count' => count($files)], 'OK');
       echo json_encode(['ok' => true, 'files' => $files, 'dir' => $backupDir]);
       break;
 
-    case 'download':
+    case 'download': {
       $file = basename($_GET['file'] ?? '');
-      streamDownload($backupDir . '/' . $file, $file);
+      $fileAbs = $backupDir . '/' . $file;
+      if (!is_file($fileAbs)) {
+        log_bita($pdo, $bitacoraLoaded, 'descargar', ['file' => $file, 'motivo' => 'not_found'], 'ERROR');
+        http_response_code(404);
+        echo json_encode(['ok' => false, 'msg' => 'Archivo no encontrado']);
+        break;
+      }
+      log_bita($pdo, $bitacoraLoaded, 'descargar', ['file' => $file], 'OK');
+      streamDownload($fileAbs, $file);
       exit;
+    }
 
-    case 'delete':
+    case 'delete': {
       $file = basename($_POST['file'] ?? '');
       $fileAbs = $backupDir . '/' . $file;
       if (is_file($fileAbs)) {
         @unlink($fileAbs);
+        log_bita($pdo, $bitacoraLoaded, 'eliminar', ['file' => $file], 'OK');
         echo json_encode(['ok' => true, 'msg' => 'Archivo eliminado']);
-      } else echo json_encode(['ok' => false, 'msg' => 'Archivo no encontrado']);
+      } else {
+        log_bita($pdo, $bitacoraLoaded, 'eliminar', ['file' => $file, 'motivo' => 'not_found'], 'ERROR');
+        echo json_encode(['ok' => false, 'msg' => 'Archivo no encontrado']);
+      }
       break;
+    }
 
-    case 'restore':
+    case 'restore': {
       @ini_set('max_execution_time', '300');
       @ini_set('memory_limit', '512M');
 
@@ -261,14 +293,17 @@ try {
       $postMaxBytes = (int)$postMax * $mult;
 
       if ($contentLen > 0 && $postMaxBytes > 0 && $contentLen > $postMaxBytes) {
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['motivo' => 'body_exceeds_post_max_size', 'post_max_size' => $postMax], 'ERROR');
         echo json_encode(['ok'=>false,'msg'=>'El cuerpo supera post_max_size (actual: '.$postMax.')']);
         break;
       }
       if ($contentType && stripos($contentType, 'multipart/form-data') === false) {
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['motivo' => 'wrong_content_type', 'content_type' => $contentType], 'ERROR');
         echo json_encode(['ok'=>false,'msg'=>'CONTENT_TYPE no es multipart/form-data. Usa form-data con sql_file.']);
         break;
       }
       if (empty($_FILES) || !isset($_FILES['sql_file'])) {
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['motivo' => 'no_file'], 'ERROR');
         echo json_encode(['ok'=>false,'msg'=>'No se recibió el archivo (sql_file).']);
         break;
       }
@@ -284,43 +319,63 @@ try {
           UPLOAD_ERR_CANT_WRITE=>'No se pudo escribir en disco',
           UPLOAD_ERR_EXTENSION=>'Una extensión detuvo la subida',
         ];
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['motivo' => 'upload_error', 'code' => $err, 'msg' => ($map[$err]??'upload_error')], 'ERROR');
         echo json_encode(['ok'=>false,'msg'=>$map[$err]??'Error al subir archivo ('.$err.')']);
         break;
       }
 
       $tmp = $_FILES['sql_file']['tmp_name'];
       if (!is_uploaded_file($tmp)) {
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['motivo' => 'tmp_invalid'], 'ERROR');
         echo json_encode(['ok'=>false,'msg'=>'Archivo temporal inválido']);
         break;
       }
 
       $sql = @file_get_contents($tmp);
       if ($sql === false || $sql === '') {
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['motivo' => 'empty_sql'], 'ERROR');
         echo json_encode(['ok'=>false,'msg'=>'No se pudo leer el contenido del .sql']);
         break;
       }
 
       // Normalizar y dividir (sin DELIMITER)
       $sql = str_replace("\r\n","\n",$sql);
-      $statements = array_filter(array_map('trim', preg_split('/;\s*(?:\n|$)/',$sql)));
+      $statements = array_filter(array_map('trim', preg_split('/;\s*(?:\n|$)/', $sql)));
+
+      // Filtro: eliminar SETs de mysqldump que pueden dejar variables @OLD_ en NULL
+      $skipPatterns = [
+        '/^\/\*![0-9]{5}\s+SET\s+@OLD_/i',
+        '/SET\s+CHARACTER_SET_(?:CLIENT|RESULTS)\s*=\s*@OLD_/i',
+        '/SET\s+COLLATION_CONNECTION\s*=\s*@OLD_/i',
+        '/SET\s+TIME_ZONE\s*=\s*@OLD_/i',
+        '/SET\s+SQL_MODE\s*=\s*@OLD_/i',
+        '/^SET\s+NAMES\s+/i',
+      ];
+      $statements = array_values(array_filter($statements, function($stmt) use ($skipPatterns) {
+        foreach ($skipPatterns as $re) {
+          if (preg_match($re, $stmt)) return false;
+        }
+        return $stmt !== '';
+      }));
+
       if (empty($statements)) {
-        echo json_encode(['ok'=>false,'msg'=>'El archivo no contiene sentencias SQL válidas']);
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['motivo' => 'no_valid_statements_after_cleanup'], 'ERROR');
+        echo json_encode(['ok'=>false,'msg'=>'El archivo no contiene sentencias SQL válidas tras limpieza']);
         break;
       }
 
       try {
         if (isPdo($pdo)) {
-          // Sin transacciones por DDL (evitamos "There is no active transaction")
           $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
           $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
           foreach ($statements as $stmt) {
             if ($stmt!=='') $pdo->exec($stmt);
           }
           $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
+          log_bita($pdo, $bitacoraLoaded, 'restaurar', ['ok' => true, 'stmts' => count($statements)], 'OK');
           echo json_encode(['ok'=>true,'msg'=>'Restauración completada (PDO, sin transacciones)']);
         } else {
           $link = getMysqli($conn, $mysqli);
-          // Sin transacciones explícitas por DDL; solo FK OFF/ON
           $link->query('SET FOREIGN_KEY_CHECKS=0');
           foreach ($statements as $stmt) {
             if ($stmt!=='' && !$link->query($stmt)) {
@@ -328,18 +383,23 @@ try {
             }
           }
           $link->query('SET FOREIGN_KEY_CHECKS=1');
+          log_bita($pdo, $bitacoraLoaded, 'restaurar', ['ok' => true, 'stmts' => count($statements)], 'OK');
           echo json_encode(['ok'=>true,'msg'=>'Restauración completada (MySQLi, sin transacciones)']);
         }
       } catch (Throwable $e) {
+        log_bita($pdo, $bitacoraLoaded, 'restaurar', ['ex' => $e->getMessage()], 'ERROR');
         http_response_code(500);
         echo json_encode(['ok'=>false,'msg'=>'Error al restaurar: '.$e->getMessage()]);
       }
       break;
+    }
 
     default:
+      log_bita($pdo, $bitacoraLoaded, 'accion_invalida', ['action' => $action], 'ERROR');
       echo json_encode(['ok'=>false,'msg'=>'Acción no válida']);
   }
 } catch (Throwable $e) {
+  log_bita($pdo, $bitacoraLoaded, 'excepcion', ['ex' => $e->getMessage()], 'ERROR');
   http_response_code(500);
   echo json_encode(['ok'=>false,'msg'=>'Excepción: '.$e->getMessage()]);
 }

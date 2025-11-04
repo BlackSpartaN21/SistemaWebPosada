@@ -1,7 +1,10 @@
 <?php
 // controllers/cliente.php
+declare(strict_types=1);
+
 session_start();
 require_once '../config/db.php';
+require_once '../config/bitacora.php'; // [BITÁCORA]
 
 function back_to($fallback = '../views/modificar.php') {
   $to = $_SERVER['HTTP_REFERER'] ?? $fallback;
@@ -13,6 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
   // CSRF requerido para update (lo inyecta modificar.php)
   if (!isset($_POST['csrf'], $_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
+    // [BITÁCORA] CSRF inválido
+    bitacora_log($pdo, 'Clientes', 'editar', [
+      'motivo' => 'csrf_invalid'
+    ], 'ERROR');
+
     $_SESSION['flash_alert_type'] = 'error';
     $_SESSION['flash_alert_msg']  = 'Sesión inválida (CSRF). Vuelve a intentarlo.';
     back_to();
@@ -40,6 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
   if ($doc_original === '')                                                       $errors[] = 'Falta documento original.';
 
   if ($errors) {
+    // [BITÁCORA] Error de validación
+    bitacora_log($pdo, 'Clientes', 'editar', [
+      'motivo'       => 'validacion',
+      'errores'      => $errors,
+      'doc_original' => $doc_original,
+      'documento'    => $documento,
+      'correo'       => $correo
+    ], 'ERROR');
+
     $_SESSION['flash_alert_type'] = 'error';
     $_SESSION['flash_alert_msg']  = implode(' ', $errors);
     back_to();
@@ -67,18 +84,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
       ':doc_original' => $doc_original,
     ]);
 
+    // [BITÁCORA] Éxito
+    bitacora_log($pdo, 'Clientes', 'editar', [
+      'doc_original'   => $doc_original,
+      'documento_nuevo'=> $documento,
+      'correo'         => $correo,
+      'filas_afectadas'=> $stmt->rowCount()
+    ], 'OK');
+
     $_SESSION['flash_alert_type'] = 'success';
     $_SESSION['flash_alert_msg']  = 'Cliente actualizado correctamente.';
   } catch (PDOException $e) {
     $msg = ($e->getCode() === '23000')
          ? 'Documento o correo ya registrados.'
          : 'Error al actualizar (código '.$e->getCode().').';
+
+    // [BITÁCORA] Error SQL
+    bitacora_log($pdo, 'Clientes', 'editar', [
+      'doc_original' => $doc_original,
+      'documento'    => $documento,
+      'correo'       => $correo,
+      'pdo_code'     => $e->getCode(),
+      'ex'           => $e->getMessage()
+    ], 'ERROR');
+
     $_SESSION['flash_alert_type'] = 'error';
     $_SESSION['flash_alert_msg']  = $msg;
   }
 
   back_to();
 }
+
+ // [BITÁCORA] Método no permitido
+bitacora_log($pdo, 'Clientes', 'editar', [
+  'motivo' => 'method_not_allowed',
+  'method' => $_SERVER['REQUEST_METHOD'] ?? null,
+  'action' => $_POST['action'] ?? null
+], 'ERROR');
 
 http_response_code(405);
 echo 'Método no permitido';
