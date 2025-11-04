@@ -147,10 +147,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link href="https://posadameridavacacional.com/wp-content/plugins/elementor/assets/lib/animations/styles/e-animation-pulse.min.css?ver=3.30.2" id="e-animation-pulse-css" media="all" rel="stylesheet"/>
 <link href="https://posadameridavacacional.com/wp-content/plugins/elementor/assets/lib/swiper/v8/css/swiper.min.css?ver=8.4.5" id="swiper-css" media="all" rel="stylesheet"/>
 <link href="https://posadameridavacacional.com/wp-content/plugins/elementor/assets/css/conditionals/e-swiper.min.css?ver=3.30.2" id="e-swiper-css" media="all" rel="stylesheet"/>
-<link href="https://posadameridavacacional.com/wp-content/uploads/elementor/css/post-1174.css?ver=1751379836" id="elementor-post-1174-css" media="all" rel="stylesheet">
+<link href="https://posadameridavacacional.com/wp-content/uploads/elementor/css/post-1174.css?ver=1751379836" id="elementor-post-1174-css" media="all" rel="stylesheet"/>
 <link href="https://posadameridavacacional.com/wp-content/plugins/royal-elementor-addons/assets/css/lib/animations/wpr-animations.min.css?ver=1.7.1027" id="wpr-animations-css-css" media="all" rel="stylesheet"/>
 <link href="https://posadameridavacacional.com/wp-content/plugins/royal-elementor-addons/assets/css/lib/animations/loading-animations.min.css?ver=1.7.1027" id="wpr-loading-animations-css-css" media="all" rel="stylesheet"/>
-<link href="https://posadameridavacacional.com/wp-content/plugins/royal-elementor-addons/assets/css/lib/animations/button-animations.min.css?ver=1.7.1027" id="wpr-button-animations-css-css" media="all" rel="stylesheet"/>
+<link href="https://posadameridavacacional.com/wp-content/plugins/royal-elementor-addons/assets/css/lib/animations/button-animations.min.css?ver=1.7.1027" id="wpr-button-animations-css-css" media="all" rel="stylesheet">
 <link href="https://posadameridavacacional.com/wp-content/plugins/royal-elementor-addons/assets/css/lib/animations/text-animations.min.css?ver=1.7.1027" id="wpr-text-animations-css-css" media="all" rel="stylesheet"/>
 <link href="https://posadameridavacacional.com/wp-content/plugins/royal-elementor-addons/assets/css/lib/lightgallery/lightgallery.min.css?ver=1.7.1027" id="wpr-lightgallery-css-css" media="all" rel="stylesheet"/>
 <link href="https://posadameridavacacional.com/wp-content/plugins/royal-elementor-addons/assets/css/frontend.min.css?ver=1.7.1027" id="wpr-addons-css-css" media="all" rel="stylesheet"/>
@@ -1029,6 +1029,28 @@ section[data-id="2b9a70c"] .wpr-pricing-table-button button::after{ content:none
   margin-top:6px !important;
 }
 </style>
+<style>
+/* Empuja la COLUMNA del mapa hacia abajo para alinear el inicio con el primer párrafo. */
+.map-col-offset{ margin-top: clamp(60px, 7vw, 140px) !important; }
+@media (max-width: 768px){
+  .map-col-offset{ margin-top: clamp(16px, 6vw, 40px) !important; }
+}
+</style>
+<style>
+/* Override más fuerte: bajar aún más la columna del mapa */
+.map-col-offset{ margin-top: clamp(140px, 14vw, 300px) !important; }
+@media (max-width: 768px){
+  .map-col-offset{ margin-top: clamp(36px, 12vw, 96px) !important; }
+}
+</style>
+
+<style>
+/* Pequeño ajuste extra: bajar un poco más la columna del mapa */
+.map-col-offset{ margin-top: clamp(160px, 15vw, 320px) !important; }
+@media (max-width: 768px){
+  .map-col-offset{ margin-top: clamp(40px, 13vw, 104px) !important; }
+}
+</style>
 </head>
 <body class="home wp-singular page-template-default page page-id-22 wp-custom-logo wp-embed-responsive wp-theme-hello-elementor wp-child-theme-hello-elementor-child hello-elementor-default elementor-default elementor-kit-12 elementor-page elementor-page-22" data-rsssl="1">
 <!-- Google Tag Manager (noscript) -->
@@ -1647,7 +1669,7 @@ y nuestras instalaciones.</h6></p>
 </div>
 </div>
 </div>
-<div class="elementor-element elementor-element-aa75ef8 e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child" data-element_type="container" data-id="aa75ef8">
+<div class="elementor-element elementor-element-aa75ef8 e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child map-col-offset" data-element_type="container" data-id="aa75ef8" style="margin-top: clamp(160px, 15vw, 320px) !important;">
 <div class="elementor-element elementor-element-9f3475d elementor-widget elementor-widget-google_maps" data-element_type="widget" data-id="9f3475d" data-widget_type="google_maps.default">
 <div class="elementor-widget-container">
 <div class="elementor-custom-embed">
@@ -1841,7 +1863,6 @@ y nuestras instalaciones.</h6></p>
 <div class="elementor-element elementor-element-06dd268 elementor-widget elementor-widget-heading" data-element_type="widget" data-id="06dd268" data-widget_type="heading.default">
 </div>
 <div class="elementor-element elementor-element-1a5ca48 elementor-align-left elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list no-icons-centered-left" data-element_type="widget" data-id="1a5ca48" data-widget_type="icon-list.default">
-
 </div>
 </div>
 </div>
