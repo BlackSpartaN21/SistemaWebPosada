@@ -1049,9 +1049,136 @@ section[data-id="2b9a70c"] .wpr-pricing-table-button button::after{ content:none
 .map-col-offset{ margin-top: clamp(160px, 15vw, 320px) !important; }
 @media (max-width: 768px){
   .map-col-offset{ margin-top: clamp(40px, 13vw, 104px) !important; }
-}
+} 
+<style id="lm-tight-spacing">
+  /* ——— GUTENBERG: bajar separación vertical global ——— */
+  :where(.wp-site-blocks) > * { margin-block-start: 10px !important; }
+  :root :where(.is-layout-flow) > *{ margin-block-start: 10px !important; }
+  :root :where(.is-layout-constrained) > *{ margin-block-start: 10px !important; }
+  :root :where(.is-layout-flex){ gap: 8px !important; }
+  :root :where(.is-layout-grid){ gap: 8px !important; }
+
+  /* ——— Secciones principales (anclas del menú): casi sin espacio ——— */
+  #descripcion, #habitaciones, #ubicacion, #contacto, #reserva{
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  /* ——— Elementor: widgets/containers con menos margen ——— */
+  .elementor-section,
+  .elementor-container,
+  .elementor-widget,
+  .elementor-widget-wrap{
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+</style> 
+<style id="lm-tighter-spacing-v2">
+  /* 1) Compactar TODAS las separaciones dirigidas */
+  :root{
+    /* valores más pequeños que los actuales */
+    --gap-sm: clamp(6px, 1.2vw, 12px) !important;
+    --gap-xl: clamp(10px, 2vw, 18px) !important;
+    --sep-xl: clamp(10px, 2vw, 18px) !important;
+  }
+  .section-gap,
+  .section-gap--xl{
+    margin-top: var(--gap-sm) !important;
+    margin-bottom: var(--gap-sm) !important;
+  }
+  .gap-before-xl{ margin-top: var(--gap-sm) !important; }
+  .gap-after-xl { margin-bottom: var(--gap-sm) !important; }
+
+  /* 2) Entre TARIFAS (#habitaciones) y UBICACIÓN (#ubicacion): mínimo espacio */
+  #habitaciones{ margin-bottom: 8px !important; padding-bottom: 4px !important; }
+  #ubicacion{    margin-top: 8px !important;  padding-top: 4px !important; }
+
+  /* Si existe el “espaciador” del mapa, hazlo muy pequeño */
+  .ubicacion-spacer{ height: clamp(6px, 1.8vw, 14px) !important; }
+
+  /* 3) “Nosotros ↔ Opiniones” y con el pie de página: recortar al mínimo */
+  /* Reduce márgenes verticales de bloques grandes de Elementor */
+  .elementor-section,
+  .e-con,
+  .elementor-container{
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* El último bloque del <main> antes del footer casi sin aire */
+  main > :where(*) :where(.elementor-section, .e-con):last-child,
+  main > :where(.elementor-section, .e-con):last-child{
+    margin-bottom: 8px !important;
+    padding-bottom: 4px !important;
+  }
+
+  /* 4) Footer más compacto (el “espacio gigante” al final) */
+  footer{ 
+    margin-top: 0 !important;
+    padding-top: 16px !important; 
+    padding-bottom: 16px !important;
+  }
+  .footer-content,
+  .footer-bottom{ margin-top: 0 !important; } 
+  
+  /* Quita el bloque vacío de cierre (está justo antes del </main>) */
+  .elementor-element-7aa328f,
+  .elementor-element-6577503{
+    display: none !important;
+  }
+
+  /* El contenedor de esos vacíos sin aire extra */
+  .elementor-element-29b6ab2{
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* La sección “Nosotros + Opiniones” sin colchón inferior */
+  .elementor-element-926b48a,
+  .elementor-element-926b48a > .e-con-inner{
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Remate: main y su último hijo sin espacio */
+  main{ margin-bottom: 0 !important; padding-bottom: 0 !important; }
+  main > *:last-child{ margin-bottom: 0 !important; padding-bottom: 0 !important; } 
+  
+</style>
+</style>
 </style>
 </head>
+<style id="lm-fix-last-gap-only">
+  /* No tocamos el carrusel de Opiniones */
+
+  /* El contenedor vacío justo antes del footer */
+  main [data-id="29b6ab2"],
+  main [data-id="6577503"],
+  main [data-id="7aa328f"]{
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+  main [data-id="29b6ab2"] > .e-con-inner{ padding: 0 !important; }
+
+  /* Remate: 2px de respiro antes del footer */
+  main{ margin-bottom: 0 !important; padding-bottom: 2px !important; }
+  main > *:last-child{ margin-bottom: 0 !important; padding-bottom: 2px !important; }
+</style> 
+<style id="lm-hide-empty-tail">
+  main [data-id="29b6ab2"]{ display: none !important; }
+</style> 
+
 <body class="home wp-singular page-template-default page page-id-22 wp-custom-logo wp-embed-responsive wp-theme-hello-elementor wp-child-theme-hello-elementor-child hello-elementor-default elementor-default elementor-kit-12 elementor-page elementor-page-22" data-rsssl="1">
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe height="0" src="https://www.googletagmanager.com/ns.html?id=GTM-T926TMC" style="display:none;visibility:hidden" width="0"></iframe></noscript>
@@ -1853,35 +1980,12 @@ y nuestras instalaciones.</h6></p>
 </div>
 </div>
 </section>
-<div class="elementor-element elementor-element-804ac35 e-flex e-con-boxed wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-parent" data-element_type="container" data-id="804ac35">
-<div class="e-con-inner">
-<div class="elementor-element elementor-element-297d086 e-flex e-con-boxed wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child" data-element_type="container" data-id="297d086">
-</div>
-<div class="elementor-element elementor-element-1804abf e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child" data-element_type="container" data-id="1804abf">
-<div class="elementor-element elementor-element-5faaed8 elementor-widget elementor-widget-heading" data-element_type="widget" data-id="5faaed8" data-widget_type="heading.default">
-</div>
-<div class="elementor-element elementor-element-06dd268 elementor-widget elementor-widget-heading" data-element_type="widget" data-id="06dd268" data-widget_type="heading.default">
-</div>
-<div class="elementor-element elementor-element-1a5ca48 elementor-align-left elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list no-icons-centered-left" data-element_type="widget" data-id="1a5ca48" data-widget_type="icon-list.default">
-</div>
+
 </div>
 </div>
 </div></div>
 </div>
-<div class="elementor-element elementor-element-29b6ab2 e-flex e-con-boxed wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-parent" data-element_type="container" data-id="29b6ab2">
-<div class="e-con-inner">
-<div class="elementor-element elementor-element-6577503 e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child" data-element_type="container" data-id="6577503">
-<div class="elementor-element elementor-element-c7628d9 elementor-view-stacked elementor-shape-circle elementor-widget elementor-widget-icon" data-element_type="widget" data-id="c7628d9" data-widget_type="icon.default">
-</div>
-<div class="elementor-element elementor-element-3a783e3 elementor-widget elementor-widget-text-editor" data-element_type="widget" data-id="3a783e3" data-widget_type="text-editor.default">
-<div class="elementor-widget-container">
-</div>
-</div>
-<div class="elementor-element elementor-element-7aa328f e-con-full e-flex wpr-particle-no wpr-jarallax-no wpr-parallax-no wpr-sticky-section-no e-con e-child" data-element_type="container" data-id="7aa328f">
-</div>
-</div>
-</div>
-</div></main>
+
 <footer>
 <div class="footer-content">
 <div class="footer-section">
