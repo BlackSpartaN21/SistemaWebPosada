@@ -1,7 +1,18 @@
 <?php
+// controllers/procesar_reserva.php
+declare(strict_types=1);
+
+session_start();
 require_once '../config/db.php';
+require_once '../config/bitacora.php'; // [BITÁCORA]
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo' => 'method_not_allowed',
+            'method' => $_SERVER['REQUEST_METHOD'] ?? null
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     echo "Acceso no permitido.";
     exit;
 }
@@ -57,6 +68,12 @@ $stmt = $pdo->prepare("SELECT id_tipo_habitacion, estado_habitacion FROM habitac
 $stmt->execute([$id_habitacion]);
 $hab = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$hab) {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'         => 'hab_no_encontrada',
+            'id_habitacion'  => $id_habitacion
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     header("Location: ../views/recepcion.php?reserva=error&code=hab_no_encontrada");
     exit;
 }
@@ -65,10 +82,22 @@ $estado_habitacion  = (int)$hab['estado_habitacion'];
 
 // No permitir reservar si habitación está deshabilitada (3) o no disponible (0)
 if ($estado_habitacion === 3) {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'        => 'hab_deshabilitada',
+            'id_habitacion' => $id_habitacion
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     header("Location: ../views/recepcion.php?reserva=error&code=hab_deshabilitada");
     exit;
 }
 if ($estado_habitacion === 0) {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'        => 'hab_no_disponible',
+            'id_habitacion' => $id_habitacion
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     header("Location: ../views/recepcion.php?reserva=error&code=hab_no_disponible");
     exit;
 }
@@ -78,6 +107,14 @@ $stmt = $pdo->prepare("SELECT id_tarifa, precio_tarifa FROM tarifas WHERE id_tip
 $stmt->execute([$id_tipo_habitacion, $tipo_tarifa]);
 $tarifa = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$tarifa) {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'              => 'tarifa_no_encontrada',
+            'id_habitacion'       => $id_habitacion,
+            'id_tipo_habitacion'  => $id_tipo_habitacion,
+            'tipo_tarifa'         => $tipo_tarifa
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     header("Location: ../views/recepcion.php?reserva=error&code=tarifa_no_encontrada");
     exit;
 }
@@ -94,10 +131,24 @@ $stmtCap = $pdo->prepare("
 $stmtCap->execute([$id_habitacion]);
 $capMax = (int)$stmtCap->fetchColumn();
 if ($capMax <= 0) {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'        => 'capacidad_indefinida',
+            'id_habitacion' => $id_habitacion
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     header("Location: ../views/recepcion.php?reserva=error&code=capacidad_indefinida");
     exit;
 }
 if ($cantidad_personas < 1 || $cantidad_personas > $capMax) {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'            => 'capacidad_excedida',
+            'id_habitacion'     => $id_habitacion,
+            'capacidad_maxima'  => $capMax,
+            'solicitadas'       => $cantidad_personas
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     header("Location: ../views/recepcion.php?reserva=error&code=capacidad_excedida&max=$capMax");
     exit;
 }
@@ -114,6 +165,14 @@ $stmt = $pdo->prepare("
 $stmt->execute([$id_habitacion, $fecha_llegada, $fecha_salida]);
 $hayTraslape = (int)$stmt->fetchColumn() > 0;
 if ($hayTraslape) {
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'         => 'traslape',
+            'id_habitacion'  => $id_habitacion,
+            'llegada'        => $fecha_llegada,
+            'salida'         => $fecha_salida
+        ], 'ERROR');
+    } catch (Throwable $_) {}
     header("Location: ../views/recepcion.php?reserva=error&code=traslape");
     exit;
 }
@@ -143,17 +202,52 @@ try {
 
     if (!$ok1 || !$ok2) {
         $pdo->rollBack();
+
+        try {
+            bitacora_log($pdo, 'Reservas', 'crear', [
+                'motivo'            => 'transaccion_fallida',
+                'id_habitacion'     => $id_habitacion,
+                'documento_cliente' => $documento_cliente
+            ], 'ERROR');
+        } catch (Throwable $_) {}
+
         header("Location: ../views/recepcion.php?reserva=error&code=bd");
         exit;
     }
 
+    $reservaId = (int)$pdo->lastInsertId();
     $pdo->commit();
+
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'id_reserva'        => $reservaId,
+            'id_habitacion'     => $id_habitacion,
+            'documento_cliente' => $documento_cliente,
+            'tipo_tarifa'       => $tipo_tarifa,
+            'dias'              => $dias_estadia,
+            'monto_total'       => $monto_total,
+            'metodo_pago'       => $metodo_pago,
+            'llegada'           => $fecha_llegada,
+            'salida'            => $fecha_salida,
+            'estado'            => $estado
+        ], 'OK');
+    } catch (Throwable $_) {}
+
     header('Location: ../views/recepcion.php?reserva=success');
     exit;
 
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
-    // Loguea $e->getMessage() si tienes logger
+
+    try {
+        bitacora_log($pdo, 'Reservas', 'crear', [
+            'motivo'            => 'excepcion',
+            'ex'                => $e->getMessage(),
+            'id_habitacion'     => $id_habitacion,
+            'documento_cliente' => $documento_cliente
+        ], 'ERROR');
+    } catch (Throwable $_) {}
+
     header("Location: ../views/recepcion.php?reserva=error&code=excepcion");
     exit;
 }

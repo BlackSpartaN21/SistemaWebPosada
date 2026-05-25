@@ -1,6 +1,6 @@
 -- Backup generado por Sistema Web Posada Las Mandarinas
 -- Base de datos: `posadalasmandarinas_db`
--- Fecha: 2025-11-03 05:17:53
+-- Fecha: 2025-11-04 05:48:35
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -10,6 +10,37 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Estructura de tabla para `bitacora`
+--
+
+DROP TABLE IF EXISTS `bitacora`;
+CREATE TABLE `bitacora` (
+  `id_bitacora` int(11) NOT NULL AUTO_INCREMENT,
+  `fecha` datetime NOT NULL DEFAULT current_timestamp(),
+  `id_usuario` int(11) DEFAULT NULL,
+  `modulo` varchar(40) NOT NULL,
+  `accion` varchar(40) NOT NULL,
+  `detalle` text DEFAULT NULL,
+  `ip` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `resultado` enum('OK','ERROR') NOT NULL DEFAULT 'OK',
+  PRIMARY KEY (`id_bitacora`),
+  KEY `idx_fecha` (`fecha`),
+  KEY `idx_modulo` (`modulo`),
+  KEY `idx_accion` (`accion`),
+  KEY `idx_usuario` (`id_usuario`),
+  CONSTRAINT `bitacora_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `bitacora`
+--
+
+INSERT INTO `bitacora` (`id_bitacora`,`fecha`,`id_usuario`,`modulo`,`accion`,`detalle`,`ip`,`user_agent`,`resultado`) VALUES 
+(1,'2025-11-04 00:41:07',2,'Habitaciones','crear','{\"nombre\":\"PRUEBA-BITA-001\",\"id_tipo\":1,\"ex\":\"SQLSTATE[42S02]: Base table or view not found: 1146 Table \'posadalasmandarinas_db.tipos_habitacion\' doesn\'t exist\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','ERROR'),
+(2,'2025-11-04 00:48:26',2,'Backups','listar','{\"count\":2}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK');
 
 --
 -- Estructura de tabla para `clientes`
@@ -64,7 +95,7 @@ CREATE TABLE `habitaciones` (
   UNIQUE KEY `nombre_habitacion` (`nombre_habitacion`),
   KEY `id_tipo_habitacion` (`id_tipo_habitacion`),
   CONSTRAINT `habitaciones_ibfk_1` FOREIGN KEY (`id_tipo_habitacion`) REFERENCES `tipo_habitaciones` (`id_tipo_habitacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `habitaciones`
@@ -72,7 +103,7 @@ CREATE TABLE `habitaciones` (
 
 INSERT INTO `habitaciones` (`id_habitacion`,`nombre_habitacion`,`descripcion_habitacion`,`id_tipo_habitacion`,`estado_habitacion`) VALUES 
 (1,1,'',1,1),
-(2,2,'',1,1),
+(2,2,'',1,0),
 (3,3,'',1,1),
 (4,4,'',1,1),
 (5,5,'',1,1),
@@ -81,8 +112,33 @@ INSERT INTO `habitaciones` (`id_habitacion`,`nombre_habitacion`,`descripcion_hab
 (8,8,'',2,1),
 (9,9,'',1,1),
 (10,10,'',1,1),
-(11,11,'',1,1),
-(17,12,'Dos camas matrimoniales',6,1);
+(11,11,'',1,1);
+
+--
+-- Estructura de tabla para `login_attempts`
+--
+
+DROP TABLE IF EXISTS `login_attempts`;
+CREATE TABLE `login_attempts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(45) NOT NULL,
+  `email` varchar(190) NOT NULL,
+  `attempts` int(11) NOT NULL DEFAULT 0,
+  `last_attempt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `locked_until` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip` (`ip`),
+  KEY `email` (`email`),
+  KEY `locked_until` (`locked_until`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `login_attempts`
+--
+
+INSERT INTO `login_attempts` (`id`,`ip`,`email`,`attempts`,`last_attempt`,`locked_until`) VALUES 
+(1,'::1','fab@gmail.com',3,'2025-11-03 13:02:12',NULL),
+(2,'::1','efefe@gm.com',1,'2025-11-03 13:01:32',NULL);
 
 --
 -- Estructura de tabla para `metodos_de_pago`
@@ -133,7 +189,7 @@ CREATE TABLE `reservas` (
   CONSTRAINT `reservas_ibfk_2` FOREIGN KEY (`id_tarifa`) REFERENCES `tarifas` (`id_tarifa`),
   CONSTRAINT `reservas_ibfk_3` FOREIGN KEY (`id_habitacion`) REFERENCES `habitaciones` (`id_habitacion`),
   CONSTRAINT `reservas_ibfk_4` FOREIGN KEY (`id_metodo_pago`) REFERENCES `metodos_de_pago` (`id_metodo_pago`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `reservas`
@@ -176,7 +232,11 @@ INSERT INTO `reservas` (`id_reserva`,`id_habitacion`,`documento_cliente`,`id_tar
 (36,1,12777710,2,'2025-10-20 12:11:00','2025-10-24 12:11:00',2,40.00,2,'Finalizada','','','2025-10-20 12:11:36'),
 (40,1,13577225,1,'2025-11-01 19:53:41','2025-11-01 22:53:41',2,5.00,2,'Finalizada','','','2025-11-01 19:53:41'),
 (41,8,'31092233-4',3,'2025-11-01 19:55:00','2025-11-04 19:55:00',3,45.00,1,'Finalizada','','','2025-11-01 19:56:29'),
-(42,17,15789654,7,'2025-11-01 20:05:00','2025-11-04 20:05:00',4,60.00,2,'Finalizada','','','2025-11-01 20:06:14');
+(43,2,12777710,2,'2025-11-03 10:34:00','2025-11-07 10:34:00',2,40.00,1,'Finalizada','','','2025-11-03 10:34:47'),
+(44,4,13577896,1,'2025-11-03 10:56:32','2025-11-03 13:56:32',2,5.00,2,'Finalizada','','','2025-11-03 10:56:32'),
+(45,5,'31092233-4',2,'2025-11-03 10:58:05','2025-11-04 10:58:05',2,10.00,1,'Finalizada','','','2025-11-03 10:58:05'),
+(46,2,15789654,1,'2025-11-03 16:06:23','2025-11-03 19:06:23',2,5.00,1,'Confirmada','','','2025-11-03 16:06:23'),
+(47,7,12777710,3,'2025-11-04 00:43:47','2025-11-05 00:43:47',3,15.00,1,'Finalizada','','','2025-11-04 00:43:47');
 
 --
 -- Estructura de tabla para `tarifas`
@@ -200,8 +260,7 @@ CREATE TABLE `tarifas` (
 INSERT INTO `tarifas` (`id_tarifa`,`id_tipo_habitacion`,`tipo_tarifa`,`precio_tarifa`) VALUES 
 (1,1,'3 Horas',5.00),
 (2,1,'24 Horas',10.00),
-(3,2,'24 Horas',15.00),
-(7,6,'24 Horas',20.00);
+(3,2,'24 Horas',15.00);
 
 --
 -- Estructura de tabla para `tipo_habitaciones`
@@ -222,8 +281,7 @@ CREATE TABLE `tipo_habitaciones` (
 
 INSERT INTO `tipo_habitaciones` (`id_tipo_habitacion`,`nombre_tipo_habitacion`,`capacidad_tipo_habitacion`) VALUES 
 (1,'Matrimonial',2),
-(2,'Triple',3),
-(6,'Doble',4);
+(2,'Triple',3);
 
 --
 -- Estructura de tabla para `usuarios`
@@ -247,12 +305,11 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id_usuario`,`nombre_usuario`,`apellido_usuario`,`correo_usuario`,`contrasena_usuario`,`rol_usuario`,`fecha_creacion`) VALUES 
-(2,'Cristofer','Medina','cristofermedinar6@gmail.com','$2y$10$wFYcQ3Oua/XgJDaIxKaFxOOsGx8spjyJfLnBU8.KihGwBeaYvGqmK','Administrador','2025-07-15 22:23:52'),
-(3,'Fabian','Sánchez','fabian@gmail.com','$2y$10$wmlxpWMMRWxoM5B1DzrYfOSwQUWMtkBB9P8wi0tT8lTA/wVEUge1C','Recepcionista','2025-07-16 01:44:19'),
-(4,'Mary','Rangel','maryrangel06@gmail.com','$2y$10$k6dw57Cze6ENrTznOMMMiO8vkwLYPQm6943LQ3mCx5gC505LLBFyq','Administrador','2025-10-08 10:04:11'),
-(12,'Wilson','Santander','wilson@gmail.com','$2y$10$PxtZ3/Va1FA7nPpxEWRRK.f15uokomUDVrVn68MES7M4OtM65hfjK','Recepcionista','2025-11-02 11:38:25');
+(2,'Cristofer','Medina','cristofermedinar6@gmail.com','$2y$12$6S.KkBoYiThhnXV2Mf3uw.q32Z7kQqVs8JHa.aZIay8yC.6.aHCkG','Administrador','2025-07-15 22:23:52'),
+(3,'Fabian','Sánchez','fabian@gmail.com','$2y$12$c7DNijSQmConrTdOV6Y0FuW6BgOEBMNUQKy.JXB7FFeRACehX0iAG','Recepcionista','2025-07-16 01:44:19'),
+(4,'Mary','Rangel','maryrangel06@gmail.com','$2y$10$k6dw57Cze6ENrTznOMMMiO8vkwLYPQm6943LQ3mCx5gC505LLBFyq','Administrador','2025-10-08 10:04:11');
 
 COMMIT;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

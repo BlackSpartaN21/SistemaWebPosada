@@ -1,6 +1,6 @@
 -- Backup generado por Sistema Web Posada Las Mandarinas
 -- Base de datos: `posadalasmandarinas_db`
--- Fecha: 2025-11-03 03:47:07
+-- Fecha: 2025-11-03 18:00:08
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -74,15 +74,36 @@ INSERT INTO `habitaciones` (`id_habitacion`,`nombre_habitacion`,`descripcion_hab
 (1,1,'',1,1),
 (2,2,'',1,1),
 (3,3,'',1,1),
-(4,4,'',1,1),
-(5,5,'',1,1),
+(4,4,'',1,0),
+(5,5,'',1,0),
 (6,6,'',1,1),
 (7,7,'',2,1),
 (8,8,'',2,1),
 (9,9,'',1,1),
 (10,10,'',1,1),
-(11,11,'',1,1),
-(17,12,'Dos camas matrimoniales',6,1);
+(11,11,'',1,1);
+
+--
+-- Estructura de tabla para `login_attempts`
+--
+
+DROP TABLE IF EXISTS `login_attempts`;
+CREATE TABLE `login_attempts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(45) NOT NULL,
+  `email` varchar(190) NOT NULL,
+  `attempts` int(11) NOT NULL DEFAULT 0,
+  `last_attempt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `locked_until` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip` (`ip`),
+  KEY `email` (`email`),
+  KEY `locked_until` (`locked_until`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `login_attempts`
+--
 
 --
 -- Estructura de tabla para `metodos_de_pago`
@@ -133,7 +154,7 @@ CREATE TABLE `reservas` (
   CONSTRAINT `reservas_ibfk_2` FOREIGN KEY (`id_tarifa`) REFERENCES `tarifas` (`id_tarifa`),
   CONSTRAINT `reservas_ibfk_3` FOREIGN KEY (`id_habitacion`) REFERENCES `habitaciones` (`id_habitacion`),
   CONSTRAINT `reservas_ibfk_4` FOREIGN KEY (`id_metodo_pago`) REFERENCES `metodos_de_pago` (`id_metodo_pago`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `reservas`
@@ -176,7 +197,9 @@ INSERT INTO `reservas` (`id_reserva`,`id_habitacion`,`documento_cliente`,`id_tar
 (36,1,12777710,2,'2025-10-20 12:11:00','2025-10-24 12:11:00',2,40.00,2,'Finalizada','','','2025-10-20 12:11:36'),
 (40,1,13577225,1,'2025-11-01 19:53:41','2025-11-01 22:53:41',2,5.00,2,'Finalizada','','','2025-11-01 19:53:41'),
 (41,8,'31092233-4',3,'2025-11-01 19:55:00','2025-11-04 19:55:00',3,45.00,1,'Finalizada','','','2025-11-01 19:56:29'),
-(42,17,15789654,7,'2025-11-01 20:05:00','2025-11-04 20:05:00',4,60.00,2,'Finalizada','','','2025-11-01 20:06:14');
+(43,2,12777710,2,'2025-11-03 10:34:00','2025-11-07 10:34:00',2,40.00,1,'Finalizada','','','2025-11-03 10:34:47'),
+(44,4,13577896,1,'2025-11-03 10:56:32','2025-11-03 13:56:32',2,5.00,2,'Confirmada','','','2025-11-03 10:56:32'),
+(45,5,'31092233-4',2,'2025-11-03 10:58:05','2025-11-04 10:58:05',2,10.00,1,'Confirmada','','','2025-11-03 10:58:05');
 
 --
 -- Estructura de tabla para `tarifas`
@@ -200,8 +223,7 @@ CREATE TABLE `tarifas` (
 INSERT INTO `tarifas` (`id_tarifa`,`id_tipo_habitacion`,`tipo_tarifa`,`precio_tarifa`) VALUES 
 (1,1,'3 Horas',5.00),
 (2,1,'24 Horas',10.00),
-(3,2,'24 Horas',15.00),
-(7,6,'24 Horas',20.00);
+(3,2,'24 Horas',15.00);
 
 --
 -- Estructura de tabla para `tipo_habitaciones`
@@ -222,8 +244,7 @@ CREATE TABLE `tipo_habitaciones` (
 
 INSERT INTO `tipo_habitaciones` (`id_tipo_habitacion`,`nombre_tipo_habitacion`,`capacidad_tipo_habitacion`) VALUES 
 (1,'Matrimonial',2),
-(2,'Triple',3),
-(6,'Doble',4);
+(2,'Triple',3);
 
 --
 -- Estructura de tabla para `usuarios`
@@ -247,7 +268,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id_usuario`,`nombre_usuario`,`apellido_usuario`,`correo_usuario`,`contrasena_usuario`,`rol_usuario`,`fecha_creacion`) VALUES 
-(2,'Cristofer','Medina','cristofermedinar6@gmail.com','$2y$10$wFYcQ3Oua/XgJDaIxKaFxOOsGx8spjyJfLnBU8.KihGwBeaYvGqmK','Administrador','2025-07-15 22:23:52'),
+(2,'Cristofer','Medina','cristofermedinar6@gmail.com','$2y$12$6S.KkBoYiThhnXV2Mf3uw.q32Z7kQqVs8JHa.aZIay8yC.6.aHCkG','Administrador','2025-07-15 22:23:52'),
 (3,'Fabian','Sánchez','fabian@gmail.com','$2y$10$wmlxpWMMRWxoM5B1DzrYfOSwQUWMtkBB9P8wi0tT8lTA/wVEUge1C','Recepcionista','2025-07-16 01:44:19'),
 (4,'Mary','Rangel','maryrangel06@gmail.com','$2y$10$k6dw57Cze6ENrTznOMMMiO8vkwLYPQm6943LQ3mCx5gC505LLBFyq','Administrador','2025-10-08 10:04:11'),
 (12,'Wilson','Santander','wilson@gmail.com','$2y$10$PxtZ3/Va1FA7nPpxEWRRK.f15uokomUDVrVn68MES7M4OtM65hfjK','Recepcionista','2025-11-02 11:38:25');

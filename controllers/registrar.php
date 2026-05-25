@@ -1,7 +1,10 @@
 <?php
 // controllers/registrar.php
+declare(strict_types=1);
+
 session_start();
 require_once '../config/db.php';
+require_once '../config/bitacora.php'; // [BITÁCORA]
 
 function back_to($fallback = '../views/recepcion.php') {
   $to = $_SERVER['HTTP_REFERER'] ?? $fallback;
@@ -9,7 +12,7 @@ function back_to($fallback = '../views/recepcion.php') {
   exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
   $tipo        = trim($_POST['tipo_documento_cliente'] ?? '');
   $documento   = trim($_POST['documento_cliente'] ?? '');
   $nombres     = trim($_POST['nombres_cliente'] ?? '');
@@ -28,6 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (mb_strlen($descripcion) > 100)                                              $errors[] = 'Descripción muy larga (máx. 100).';
 
   if ($errors) {
+    // Bitácora: validación fallida
+    try {
+      bitacora_log($pdo, 'Clientes', 'crear', [
+        'motivo'     => 'validacion',
+        'documento'  => $documento,
+        'correo'     => $correo,
+        'errores'    => $errors
+      ], 'ERROR');
+    } catch (Throwable $_) {}
+
     $_SESSION['flash_alert_type'] = 'error';
     $_SESSION['flash_alert_msg']  = implode(' ', $errors);
     back_to();
@@ -49,18 +62,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       ':descripcion' => $descripcion,
     ]);
 
+    // Bitácora: OK
+    try {
+      bitacora_log($pdo, 'Clientes', 'crear', [
+        'documento' => $documento,
+        'correo'    => $correo
+      ], 'OK');
+    } catch (Throwable $_) {}
+
     $_SESSION['flash_alert_type'] = 'success';
     $_SESSION['flash_alert_msg']  = 'Cliente registrado correctamente.';
   } catch (PDOException $e) {
     $msg = ($e->getCode() === '23000')
          ? 'Documento o correo ya registrados.'
          : 'Error al registrar (código '.$e->getCode().').';
+
+    // Bitácora: ERROR SQL
+    try {
+      bitacora_log($pdo, 'Clientes', 'crear', [
+        'documento' => $documento,
+        'correo'    => $correo,
+        'pdo_code'  => $e->getCode(),
+        'ex'        => $e->getMessage()
+      ], 'ERROR');
+    } catch (Throwable $_) {}
+
     $_SESSION['flash_alert_type'] = 'error';
     $_SESSION['flash_alert_msg']  = $msg;
   }
 
   back_to();
 }
+
+// Bitácora: método no permitido
+try {
+  bitacora_log($pdo, 'Clientes', 'crear', [
+    'motivo' => 'method_not_allowed',
+    'method' => $_SERVER['REQUEST_METHOD'] ?? null
+  ], 'ERROR');
+} catch (Throwable $_) {}
 
 http_response_code(405);
 echo 'Método no permitido';
