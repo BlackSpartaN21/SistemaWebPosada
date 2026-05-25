@@ -123,17 +123,34 @@
                             <a class="nav-link" href="reportes.php">Reportes</a>
                         </li>
                         <?php if ($rol === 'Administrador'): ?>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Herramientas Administrativas
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                <li><a class="dropdown-item" href="gestionar_habitaciones.php">Gestionar Habitación</a></li>
-                                <li><a class="dropdown-item" href="gestionar_usuarios.php">Gestionar Usuarios</a></li>
-                                <li><a class="dropdown-item" href="bitacora.php">Bitacora</a></li>
-                                <!-- Agrega más ítems admin aquí -->
-                                </ul>
-                            </li>
+                      <li class="nav-item dropdown">
+                          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                              <i class="fas fa-cogs me-2"></i>Herramientas Administrativas
+                          </a>
+                          <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                              <li>
+                                  <a class="dropdown-item" href="gestionar_habitaciones.php">
+                                      <i class="fas fa-bed me-2"></i>Gestionar Habitación
+                                  </a>
+                              </li>
+                              <li>
+                                  <a class="dropdown-item" href="gestionar_usuarios.php">
+                                      <i class="fas fa-users me-2"></i>Gestionar Usuarios
+                                  </a>
+                              </li>
+                              <li>
+                                  <a class="dropdown-item" href="estadisticas.php">
+                                      <i class="fas fa-chart-column me-2"></i>Estadística
+                                  </a>
+                              </li>
+                              <li>
+                                  <a class="dropdown-item" href="bitacora.php">
+                                      <i class="fas fa-history me-2"></i>Bitacora
+                                  </a>
+                              </li>
+                              <!-- Agrega más ítems admin aquí -->
+                          </ul>
+                      </li>
     <?php endif; ?>
                     </ul>
             <!-- Avatar y Dropdown para usuario alineado a la derecha -->
@@ -176,10 +193,14 @@
             </a>
         </li>
         <li>
-            <a class="dropdown-item" href="perfil.php">
+          <a class="dropdown-item"
+            href="manual_de_usuario.pdf"
+            target="_blank"
+            rel="noopener noreferrer">
             <i class="fas fa-book me-2"></i>Manual de Usuario
-            </a>
+          </a>
         </li>
+
         <li>
             <a class="dropdown-item" href="backup.php">
             <i class="fas fa-database me-2"></i>Copia de Seguridad

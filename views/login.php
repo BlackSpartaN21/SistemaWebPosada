@@ -54,7 +54,7 @@ $swalIcon   = $swalIconMap[$alertType] ?? null;
       min-height: 100vh;
       background:
         linear-gradient( rgba(0,0,0,.45), rgba(0,0,0,.45) ),
-        url('../public/img/imglogin.jpg') center/cover no-repeat fixed;
+        url('../public/img/wallpaper.jpg') center/cover no-repeat fixed;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -137,15 +137,15 @@ $swalIcon   = $swalIconMap[$alertType] ?? null;
               <div class="invalid-feedback">La contraseña es requerida (mín. 6 caracteres).</div>
             </div>
           </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-4">
+<br>
+          <!-- <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember">
               <label class="form-check-label small" for="remember">Recordarme</label>
             </div>
-            <!-- <a href="#" class="small">¿Olvidaste tu contraseña?</a> -->
+            <a href="#" class="small">¿Olvidaste tu contraseña?</a> 
           </div>
-
+          -->
           <!-- Compatibilidad con controladores antiguos -->
           <input type="hidden" name="correo" id="mirrorCorreo">
           <input type="hidden" name="contrasena" id="mirrorContrasena">

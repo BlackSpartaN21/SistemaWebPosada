@@ -1,6 +1,6 @@
 -- Backup generado por Sistema Web Posada Las Mandarinas
 -- Base de datos: `posadalasmandarinas_db`
--- Fecha: 2025-11-04 07:09:06
+-- Fecha: 2025-11-04 21:12:50
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -32,7 +32,7 @@ CREATE TABLE `bitacora` (
   KEY `idx_accion` (`accion`),
   KEY `idx_usuario` (`id_usuario`),
   CONSTRAINT `bitacora_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `bitacora`
@@ -118,7 +118,90 @@ INSERT INTO `bitacora` (`id_bitacora`,`fecha`,`id_usuario`,`modulo`,`accion`,`de
 (77,'2025-11-04 02:03:24',2,'Habitaciones','listar','{\"total\":11}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
 (78,'2025-11-04 02:03:24',2,'TiposHabitacion','listar','{\"total\":2}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
 (79,'2025-11-04 02:03:24',2,'Tarifas','listar','{\"total\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
-(80,'2025-11-04 02:09:02',2,'Backups','listar','{\"count\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK');
+(80,'2025-11-04 02:09:02',2,'Backups','listar','{\"count\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(81,'2025-11-04 02:09:06',2,'Backups','crear','{\"db\":\"posadalasmandarinas_db\",\"file\":\"posadalasmandarinas_db_20251104_070906.sql\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(82,'2025-11-04 02:09:06',2,'Backups','listar','{\"count\":4}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(83,'2025-11-04 02:09:13',2,'Backups','eliminar','{\"file\":\"posadalasmandarinas_db_20251103_141703.sql\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(84,'2025-11-04 02:09:13',2,'Backups','listar','{\"count\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(85,'2025-11-04 02:09:16',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(86,'2025-11-04 02:09:16',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(87,'2025-11-04 02:09:27',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(88,'2025-11-04 02:09:27',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(89,'2025-11-04 02:36:46',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(90,'2025-11-04 02:36:46',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(91,'2025-11-04 02:36:47',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(92,'2025-11-04 02:36:48',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(93,'2025-11-04 02:36:48',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(94,'2025-11-04 02:36:51',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(95,'2025-11-04 02:36:51',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(96,'2025-11-04 02:36:52',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(97,'2025-11-04 02:36:52',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(98,'2025-11-04 02:36:52',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"1\",\"tipo_tarifa\":\"3 Horas\",\"precio\":5}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(99,'2025-11-04 02:36:56',2,'Reservas','crear','{\"id_reserva\":0,\"id_habitacion\":1,\"documento_cliente\":\"13577225\",\"tipo_tarifa\":\"3 Horas\",\"dias\":1,\"monto_total\":5,\"metodo_pago\":1,\"llegada\":\"2025-11-06 02:36:00\",\"salida\":\"2025-11-06 05:36:00\",\"estado\":\"Confirmada\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(100,'2025-11-04 02:36:56',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(101,'2025-11-04 02:36:56',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(102,'2025-11-04 02:37:02',2,'Habitaciones','vaciar','{\"id_habitacion\":1,\"hab_afectadas\":1,\"reservas_finalizadas\":1}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(103,'2025-11-04 02:37:04',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(104,'2025-11-04 02:37:04',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(105,'2025-11-04 02:38:03',2,'Autenticación','logout','{\"id_usuario\":2,\"ip\":\"::1\",\"remember\":\"no\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(106,'2025-11-04 09:14:44',2,'Autenticación','login','{\"ip\":\"::1\",\"id_usuario\":2,\"email\":\"cristofermedinar6@gmail.com\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(107,'2025-11-04 09:14:44',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(108,'2025-11-04 09:14:44',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(109,'2025-11-04 09:17:26',2,'Autenticación','logout','{\"id_usuario\":2,\"ip\":\"::1\",\"remember\":\"no\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(110,'2025-11-04 09:28:35',2,'Autenticación','login','{\"ip\":\"::1\",\"id_usuario\":2,\"email\":\"cristofermedinar6@gmail.com\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(111,'2025-11-04 09:28:35',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(112,'2025-11-04 09:28:35',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(113,'2025-11-04 09:28:41',2,'Reportes','exportar','{\"seccion\":\"reservas\",\"filtros\":{\"desde\":\"\",\"hasta\":\"\",\"estado\":\"\"},\"total\":43,\"monto\":700}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(114,'2025-11-04 09:28:52',2,'Habitaciones','tipos','{\"total\":2}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(115,'2025-11-04 09:28:52',2,'Habitaciones','listar','{\"total\":11}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(116,'2025-11-04 09:28:53',2,'TiposHabitacion','listar','{\"total\":2}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(117,'2025-11-04 09:28:53',2,'Tarifas','listar','{\"total\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(118,'2025-11-04 09:29:03',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(119,'2025-11-04 09:29:03',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(120,'2025-11-04 09:29:08',2,'Backups','listar','{\"count\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(121,'2025-11-04 09:29:11',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(122,'2025-11-04 09:29:11',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(123,'2025-11-04 09:29:14',2,'Autenticación','logout','{\"id_usuario\":2,\"ip\":\"::1\",\"remember\":\"no\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(124,'2025-11-04 09:37:19',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(125,'2025-11-04 09:37:19',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(126,'2025-11-04 09:37:25',2,'Backups','listar','{\"count\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(127,'2025-11-04 09:37:27',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(128,'2025-11-04 09:37:27',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(129,'2025-11-04 09:37:29',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(130,'2025-11-04 09:37:29',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(131,'2025-11-04 09:37:32',2,'Autenticación','logout','{\"id_usuario\":2,\"ip\":\"::1\",\"remember\":\"no\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(132,'2025-11-04 10:24:57',2,'Autenticación','login','{\"ip\":\"192.168.1.14\",\"id_usuario\":2,\"email\":\"cristofermedinar6@gmail.com\"}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(133,'2025-11-04 10:24:59',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(134,'2025-11-04 10:24:59',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(135,'2025-11-04 10:25:41',2,'Reportes','exportar','{\"seccion\":\"reservas\",\"filtros\":{\"desde\":\"\",\"hasta\":\"\",\"estado\":\"\"},\"total\":43,\"monto\":700}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(136,'2025-11-04 10:25:55',2,'Habitaciones','tipos','{\"total\":2}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(137,'2025-11-04 10:25:55',2,'Habitaciones','listar','{\"total\":11}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(138,'2025-11-04 10:25:56',2,'TiposHabitacion','listar','{\"total\":2}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(139,'2025-11-04 10:25:57',2,'Tarifas','listar','{\"total\":3}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(140,'2025-11-04 10:26:36',2,'Backups','listar','{\"count\":3}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(141,'2025-11-04 10:26:42',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(142,'2025-11-04 10:26:42',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(143,'2025-11-04 10:26:45',2,'Autenticación','logout','{\"id_usuario\":2,\"ip\":\"192.168.1.14\",\"remember\":\"no\"}','192.168.1.14','Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36','OK'),
+(144,'2025-11-04 15:59:08',2,'Autenticación','login','{\"ip\":\"::1\",\"id_usuario\":2,\"email\":\"cristofermedinar6@gmail.com\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(145,'2025-11-04 15:59:09',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(146,'2025-11-04 15:59:09',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(147,'2025-11-04 15:59:13',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(148,'2025-11-04 15:59:13',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(149,'2025-11-04 15:59:27',2,'Habitaciones','tipos','{\"total\":2}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(150,'2025-11-04 15:59:27',2,'Habitaciones','listar','{\"total\":11}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(151,'2025-11-04 15:59:27',2,'TiposHabitacion','listar','{\"total\":2}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(152,'2025-11-04 15:59:27',2,'Tarifas','listar','{\"total\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(153,'2025-11-04 16:00:56',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(154,'2025-11-04 16:00:56',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(155,'2025-11-04 16:11:56',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(156,'2025-11-04 16:11:56',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(157,'2025-11-04 16:12:08',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"7\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(158,'2025-11-04 16:12:08',2,'Tarifas','consultar_precio','{\"id_habitacion\":\"8\",\"tipo_tarifa\":\"24 Horas\",\"precio\":15}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(159,'2025-11-04 16:12:23',2,'Backups','listar','{\"count\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(160,'2025-11-04 16:12:33',2,'Backups','crear','{\"db\":\"posadalasmandarinas_db\",\"file\":\"posadalasmandarinas_db_20251104_211233.sql\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(161,'2025-11-04 16:12:33',2,'Backups','listar','{\"count\":4}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(162,'2025-11-04 16:12:42',2,'Backups','eliminar','{\"file\":\"posadalasmandarinas_db_20251104_211233.sql\"}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK'),
+(163,'2025-11-04 16:12:42',2,'Backups','listar','{\"count\":3}','::1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36','OK');
 
 --
 -- Estructura de tabla para `clientes`
@@ -268,7 +351,7 @@ CREATE TABLE `reservas` (
   CONSTRAINT `reservas_ibfk_2` FOREIGN KEY (`id_tarifa`) REFERENCES `tarifas` (`id_tarifa`),
   CONSTRAINT `reservas_ibfk_3` FOREIGN KEY (`id_habitacion`) REFERENCES `habitaciones` (`id_habitacion`),
   CONSTRAINT `reservas_ibfk_4` FOREIGN KEY (`id_metodo_pago`) REFERENCES `metodos_de_pago` (`id_metodo_pago`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `reservas`
@@ -316,7 +399,8 @@ INSERT INTO `reservas` (`id_reserva`,`id_habitacion`,`documento_cliente`,`id_tar
 (45,5,'31092233-4',2,'2025-11-03 10:58:05','2025-11-04 10:58:05',2,10.00,1,'Finalizada','','','2025-11-03 10:58:05'),
 (46,2,15789654,1,'2025-11-03 16:06:23','2025-11-03 19:06:23',2,5.00,1,'Confirmada','','','2025-11-03 16:06:23'),
 (47,7,12777710,3,'2025-11-04 00:43:47','2025-11-05 00:43:47',3,15.00,1,'Finalizada','','','2025-11-04 00:43:47'),
-(48,1,29852369,1,'2025-11-04 01:23:34','2025-11-04 04:23:34',2,5.00,2,'Finalizada','','','2025-11-04 01:23:34');
+(48,1,29852369,1,'2025-11-04 01:23:34','2025-11-04 04:23:34',2,5.00,2,'Finalizada','','','2025-11-04 01:23:34'),
+(49,1,13577225,1,'2025-11-06 02:36:00','2025-11-06 05:36:00',1,5.00,1,'Finalizada','','','2025-11-04 02:36:55');
 
 --
 -- Estructura de tabla para `tarifas`
