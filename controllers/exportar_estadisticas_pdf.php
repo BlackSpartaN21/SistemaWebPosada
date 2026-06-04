@@ -219,12 +219,12 @@ try {
   $promedioVenta = (float)($resumen['promedio_venta'] ?? 0);
   $habitacionesVendidas = (int)($resumen['habitaciones_vendidas'] ?? 0);
 
-  $pdf->SetFont('helvetica', 'B', 11);
-  $pdf->Write(6, 'Estadística de ventas de habitaciones');
+  $pdf->SetFont('helvetica', 'B', 12);
+  $pdf->Write(6, 'Habitaciones alquiladas');
   $pdf->Ln(7);
 
   $filtroEsc = htmlspecialchars($subtituloFiltro, ENT_QUOTES, 'UTF-8');
-  $pdf->SetFont('helvetica', '', 10);
+  $pdf->SetFont('helvetica', '', 12);
   $pdf->writeHTML('<span style="border:1px solid '.$brand.'; color:'.$brand.'; border-radius:12px; padding:3px 8px; font-size:10px;"><strong>Filtro aplicado:</strong> '.$filtroEsc.'</span>', true, false, true, false, '');
 
   // ---------- TARJETAS DE RESUMEN ----------
