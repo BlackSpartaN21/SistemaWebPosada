@@ -223,6 +223,7 @@ foreach ($ventasTiempo as $tiempo) {
 
         table {
             font-size: 11px;
+            
         }
     }
 </style>
@@ -232,11 +233,17 @@ foreach ($ventasTiempo as $tiempo) {
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
                 <h2 class="mb-1"><i class="fas fa-chart-line me-2"></i>Estadística de Habitaciones Alquiladas</h2>
-                <p class="text-muted mb-0">Habitaciones Alquiladas. Periodo: <strong><?= htmlspecialchars($tituloPeriodo) ?></strong></p>
+                <p class="text-muted mb-0">Ventas de habitaciones filtradas por día, mes o año. Periodo: <strong><?= htmlspecialchars($tituloPeriodo) ?></strong></p>
             </div>
-            <button type="button" class="btn btn-danger no-print" onclick="window.print()">
-                <i class="fas fa-print me-1"></i> Imprimir
-            </button>
+            <form method="POST" action="../controllers/exportar_estadisticas_pdf.php" target="_blank" class="no-print m-0">
+                <input type="hidden" name="tipo" value="<?= htmlspecialchars($tipoFiltro) ?>">
+                <input type="hidden" name="fecha" value="<?= htmlspecialchars($fechaDia) ?>">
+                <input type="hidden" name="mes" value="<?= htmlspecialchars($fechaMes) ?>">
+                <input type="hidden" name="anio" value="<?= htmlspecialchars($fechaAnio) ?>">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-file-pdf me-1"></i> Imprimir PDF
+                </button>
+            </form>
         </div>
 
         <form method="GET" action="estadisticas.php" class="row g-3 align-items-end mb-4 no-print">
@@ -367,9 +374,9 @@ foreach ($ventasTiempo as $tiempo) {
         </div>
 
         <div class="table-responsive">
-            <h5 class="mb-3"><i class="fas fa-table me-2"></i>Detalles de Alquileres</h5>
+            <h5 class="mb-3"><i class="fas fa-table me-2"></i>Detalle de ventas</h5>
             <table id="tablaEstadisticas" class="table table-bordered table-hover table-striped" data-page-length="25">
-                <thead>
+                <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Cliente</th>
