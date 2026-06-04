@@ -2215,6 +2215,25 @@ y nuestras instalaciones.</h6></p>
   window.addEventListener('offline', updateMap);
 })();
 </script>
+<link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+<script type="module">
+	import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+	createChat({
+		webhookUrl: 'https://posadalasmandarinas.app.n8n.cloud/webhook/a20426ab-1b76-48ca-b733-308b7b0c4e41/chat',
+		i18n: {
+			en: {
+				inputPlaceholder: 'Escribe tu pregunta...',
+				subtitle: '¡Hola! Bienvenidos a la Posada Turística Las Mandarinas',
+				// 🎯 ESTA ES LA RUTA EXACTA QUE BUSCÁBAMOS:
+				messages: {
+					'Hi there! 👋': '¡Hola! 👋',
+					'My name is Nathan. How can I assist you today?': 'Soy el asistente virtual de la Posada Turística Las Mandarinas. ¿Cómo puedo ayudarte hoy?'
+				}
+			}
+		}
+	});
+</script>
 </body>
 </html>
 <link href="vendor/posadameridavacacional.com/wp-content/plugins/elementor/assets/lib/flatpickr/flatpickr.min.css" id="flatpickr-css" media="all" rel="stylesheet"/>
