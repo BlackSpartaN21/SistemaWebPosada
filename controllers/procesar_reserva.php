@@ -29,6 +29,17 @@ $origen            = trim($_POST['origen_reserva'] ?? '');
 $observaciones     = trim($_POST['observaciones_reserva'] ?? '');
 $dias_estadia_form = isset($_POST['dias_estadia']) ? max(1, (int)$_POST['dias_estadia']) : null;
 
+// Datos informativos de conversión USD -> Bs capturados desde la modal.
+// La reserva sigue guardando monto_total en dólares para no romper reportes existentes.
+$modo_tasa_conversion = trim($_POST['modo_tasa_conversion'] ?? 'api');
+if (!in_array($modo_tasa_conversion, ['api', 'manual'], true)) {
+    $modo_tasa_conversion = 'api';
+}
+$tasa_conversion = isset($_POST['tasa_conversion']) ? (float)$_POST['tasa_conversion'] : 0.0;
+if ($tasa_conversion < 0) {
+    $tasa_conversion = 0.0;
+}
+
 // ==== Fechas (misma lógica que tenías) ====
 if (!empty($_POST['fecha_llegada'])) {
     $fecha_llegada = date('Y-m-d H:i:s', strtotime($_POST['fecha_llegada']));
@@ -179,6 +190,7 @@ if ($hayTraslape) {
 
 // ==== Calcular monto total ====
 $monto_total = $dias_estadia * $precio;
+$monto_total_bs = $tasa_conversion > 0 ? round($monto_total * $tasa_conversion, 2) : null;
 $estado      = 'Confirmada';
 
 // ==== Transacción: insertar reserva + marcar habitación ocupada ====
@@ -226,6 +238,9 @@ try {
             'tipo_tarifa'       => $tipo_tarifa,
             'dias'              => $dias_estadia,
             'monto_total'       => $monto_total,
+            'monto_total_bs'    => $monto_total_bs,
+            'tasa_conversion'   => $tasa_conversion > 0 ? $tasa_conversion : null,
+            'modo_tasa'         => $modo_tasa_conversion,
             'metodo_pago'       => $metodo_pago,
             'llegada'           => $fecha_llegada,
             'salida'            => $fecha_salida,
