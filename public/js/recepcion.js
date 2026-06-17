@@ -24,14 +24,20 @@ if ($(this).is(':checked')) {
     });
   });
 
-  // Calcular días de estadía
+  // Calcular días de estadía cuando exista un campo de salida manual.
+  // En recepción las tarifas actuales usan llegada + días o llegada + 3 horas,
+  // por eso validamos que los elementos existan antes de registrar eventos.
   const gruposFechas = document.querySelectorAll('.grupo-fechas');
   gruposFechas.forEach(grupo => {
     const id = grupo.id.replace('grupoFechas', '');
     const llegadaInput = document.getElementById('fechaLlegada' + id);
     const salidaInput = document.getElementById('fechaSalida' + id);
-    const contenedorDias = document.getElementById('diasEstadia' + id);
+    const contenedorDias = document.getElementById('diasEstadiaResumen' + id);
+
+    if (!llegadaInput || !salidaInput || !contenedorDias) return;
+
     const numDias = contenedorDias.querySelector('.num-dias');
+    if (!numDias) return;
 
     function calcularDias() {
       const llegada = new Date(llegadaInput.value);
@@ -118,31 +124,54 @@ $(document).on('click', '.btn-vaciar', function () {
     }
   });
 });
-// Validar fechas al enviar formulario
-$('#formReserva<?php echo $id; ?>').on('submit', function (e) {
-  const checkFechas = $('#checkFechas<?php echo $id; ?>').is(':checked');
-  const fechaLlegada = $('#fechaLlegada<?php echo $id; ?>').val();
-  const fechaSalida = $('#fechaSalida<?php echo $id; ?>').val();
+// Validar datos básicos al enviar cualquier formulario de reserva.
+$(document).on('submit', 'form[id^="formReserva"]', function (e) {
+  const id = this.id.replace('formReserva', '');
+  const checkFechas = $('#checkFechas' + id).is(':checked');
+  const tipoTarifa = $('#tipoTarifa' + id).val();
+  const fechaLlegada = $('#fechaLlegada' + id).val();
+  const fechaSalida = $('#fechaSalida' + id).val();
+  const tasa = parseFloat($('#tasaConversionHidden' + id).val());
 
-  if (checkFechas) {
-    if (!fechaLlegada || !fechaSalida) {
+  if (checkFechas && !fechaLlegada) {
+    e.preventDefault();
+    Swal.fire({
+      icon: 'warning',
+      title: 'Fecha requerida',
+      text: 'Debes ingresar la fecha de llegada.'
+    });
+    return;
+  }
+
+  if (checkFechas && fechaSalida && new Date(fechaSalida) <= new Date(fechaLlegada)) {
+    e.preventDefault();
+    Swal.fire({
+      icon: 'error',
+      title: 'Fechas inválidas',
+      text: 'La fecha de salida debe ser posterior a la de llegada.'
+    });
+    return;
+  }
+
+  if (!tasa || tasa <= 0) {
+    e.preventDefault();
+    Swal.fire({
+      icon: 'warning',
+      title: 'Tasa de conversión requerida',
+      text: 'Consulta la tasa BCV o activa la tasa manual antes de guardar la reserva.'
+    });
+    return;
+  }
+
+  if (tipoTarifa === '24 Horas') {
+    const dias = parseInt($('#diasEstadia' + id).val(), 10);
+    if (!dias || dias < 1) {
       e.preventDefault();
       Swal.fire({
         icon: 'warning',
-        title: 'Fechas requeridas',
-        text: 'Debes ingresar ambas fechas de llegada y salida.'
+        title: 'Días de estadía requeridos',
+        text: 'La tarifa de 24 horas necesita al menos 1 día de estadía.'
       });
-      return;
-    }
-
-    if (new Date(fechaSalida) <= new Date(fechaLlegada)) {
-      e.preventDefault();
-      Swal.fire({
-        icon: 'error',
-        title: 'Fechas inválidas',
-        text: 'La fecha de salida debe ser posterior a la de llegada.'
-      });
-      return;
     }
   }
 });

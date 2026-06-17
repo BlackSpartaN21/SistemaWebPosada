@@ -5,6 +5,7 @@ declare(strict_types=1);
 session_start();
 require_once '../config/db.php';
 require_once '../config/bitacora.php'; // [BITÁCORA]
+require_once '../config/reservas_conversion.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     try {
@@ -28,6 +29,17 @@ $metodo_pago       = (int)($_POST['metodo_pago'] ?? 0);
 $origen            = trim($_POST['origen_reserva'] ?? '');
 $observaciones     = trim($_POST['observaciones_reserva'] ?? '');
 $dias_estadia_form = isset($_POST['dias_estadia']) ? max(1, (int)$_POST['dias_estadia']) : null;
+
+// Datos informativos de conversión USD -> Bs capturados desde la modal.
+// La reserva sigue guardando monto_total en dólares para no romper reportes existentes.
+$modo_tasa_conversion = trim($_POST['modo_tasa_conversion'] ?? 'api');
+if (!in_array($modo_tasa_conversion, ['api', 'manual'], true)) {
+    $modo_tasa_conversion = 'api';
+}
+$tasa_conversion = isset($_POST['tasa_conversion']) ? (float)$_POST['tasa_conversion'] : 0.0;
+if ($tasa_conversion < 0) {
+    $tasa_conversion = 0.0;
+}
 
 // ==== Fechas (misma lógica que tenías) ====
 if (!empty($_POST['fecha_llegada'])) {
@@ -179,22 +191,44 @@ if ($hayTraslape) {
 
 // ==== Calcular monto total ====
 $monto_total = $dias_estadia * $precio;
+$monto_total_bs = $tasa_conversion > 0 ? round($monto_total * $tasa_conversion, 2) : null;
 $estado      = 'Confirmada';
 
 // ==== Transacción: insertar reserva + marcar habitación ocupada ====
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare("
-        INSERT INTO reservas (
-            id_habitacion, documento_cliente, id_tarifa, fecha_llegada, fecha_salida,
-            cantidad_personas, monto_total, id_metodo_pago, estado_reserva, observaciones_reserva, origen_reserva
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    $ok1 = $stmt->execute([
-        $id_habitacion, $documento_cliente, $id_tarifa, $fecha_llegada, $fecha_salida,
-        $cantidad_personas, $monto_total, $metodo_pago, $estado, $observaciones, $origen
-    ]);
+    $tieneColumnasConversion = reservas_tiene_columnas_conversion($pdo);
+
+    if ($tieneColumnasConversion) {
+        $stmt = $pdo->prepare("
+            INSERT INTO reservas (
+                id_habitacion, documento_cliente, id_tarifa, fecha_llegada, fecha_salida,
+                cantidad_personas, monto_total, monto_total_bs, tasa_conversion, modo_tasa_conversion,
+                id_metodo_pago, estado_reserva, observaciones_reserva, origen_reserva
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $ok1 = $stmt->execute([
+            $id_habitacion, $documento_cliente, $id_tarifa, $fecha_llegada, $fecha_salida,
+            $cantidad_personas, $monto_total, $monto_total_bs,
+            $tasa_conversion > 0 ? $tasa_conversion : null,
+            $tasa_conversion > 0 ? $modo_tasa_conversion : null,
+            $metodo_pago, $estado, $observaciones, $origen
+        ]);
+    } else {
+        // Compatibilidad: si aún no se ejecutó la migración, la reserva se guarda
+        // sin romper el flujo actual y los reportes mostrarán "—" en Monto Total Bs.
+        $stmt = $pdo->prepare("
+            INSERT INTO reservas (
+                id_habitacion, documento_cliente, id_tarifa, fecha_llegada, fecha_salida,
+                cantidad_personas, monto_total, id_metodo_pago, estado_reserva, observaciones_reserva, origen_reserva
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $ok1 = $stmt->execute([
+            $id_habitacion, $documento_cliente, $id_tarifa, $fecha_llegada, $fecha_salida,
+            $cantidad_personas, $monto_total, $metodo_pago, $estado, $observaciones, $origen
+        ]);
+    }
 
     // Marcar habitación como ocupada (estado = 0)
     $stmt = $pdo->prepare("UPDATE habitaciones SET estado_habitacion = 0 WHERE id_habitacion = ?");
@@ -226,6 +260,9 @@ try {
             'tipo_tarifa'       => $tipo_tarifa,
             'dias'              => $dias_estadia,
             'monto_total'       => $monto_total,
+            'monto_total_bs'    => $monto_total_bs,
+            'tasa_conversion'   => $tasa_conversion > 0 ? $tasa_conversion : null,
+            'modo_tasa'         => $modo_tasa_conversion,
             'metodo_pago'       => $metodo_pago,
             'llegada'           => $fecha_llegada,
             'salida'            => $fecha_salida,

@@ -9,6 +9,7 @@ error_reporting(E_ALL);
 session_start();
 
 require_once '../config/db.php';               // $pdo
+require_once '../config/reservas_conversion.php'; // Columnas de conversión Bs
 require_once '../config/bitacora.php';         // Bitácora
 require_once '../public/tcpdf/tcpdf.php';      // TCPDF
 
@@ -55,6 +56,11 @@ if ($estado !== '' && in_array($estado, $permitidos, true)) {
 }
 
 // ---------- CONSULTA ----------
+$tieneColumnasConversion = reservas_tiene_columnas_conversion($pdo);
+$selectConversion = $tieneColumnasConversion
+  ? "r.monto_total_bs, r.tasa_conversion, r.modo_tasa_conversion,"
+  : "NULL AS monto_total_bs, NULL AS tasa_conversion, NULL AS modo_tasa_conversion,";
+
 $sql = "
   SELECT
     r.id_reserva,
@@ -62,6 +68,7 @@ $sql = "
     r.fecha_salida,
     r.cantidad_personas,
     r.monto_total,
+    $selectConversion
     r.estado_reserva,
     r.origen_reserva,
     m.nombre_metodo_pago,
@@ -93,27 +100,32 @@ class PDF extends TCPDF {
     // Logo
     if (is_file($this->logoPath)) {
       $this->Image($this->logoPath, 10, 8, 24);
+      $this->SetFont('helvetica', 'B', 7.5);
+      $this->SetTextColor(80, 80, 80);
+      $this->SetXY(10, 19);
+      $this->Cell(24, 4, 'RIF: V-13577225-5', 0, 0, 'C');
     }
     // Título
-    $this->SetFont('helvetica', 'B', 14);
+    $this->SetXY(10, 9);
+    $this->SetFont('helvetica', 'B', 13);
     $this->SetTextColor(0, 0, 0);
     $this->Cell(0, 7, $this->titulo, 0, 1, 'C');
 
     // Línea de color corporativo
     $this->SetDrawColor($this->brandRGB[0], $this->brandRGB[1], $this->brandRGB[2]);
     $this->SetLineWidth(0.8);
-    $this->Line(10, 22, 200, 22);
-    $this->Ln(4);
+    $this->Line(10, 26, $this->getPageWidth() - 10, 26);
+    $this->Ln(7);
   }
 
   public function Footer() {
     $this->SetY(-18);
-    $this->SetFont('helvetica', '', 9);
+    $this->SetFont('helvetica', '', 8);
     $this->SetTextColor(120, 120, 120);
     // Línea 1: paginación
-    $this->Cell(0, 5, 'Generado por Sistema Web - Posada Las Mandarinas | Página '.$this->getAliasNumPage().' de '.$this->getAliasNbPages(), 0, 1, 'C');
+    $this->Cell(0, 5, 'Generado por Sistema Web - Posada Las Mandarinas, Ejido, Estado Mérida | Página '.$this->getAliasNumPage().' de '.$this->getAliasNbPages(), 0, 1, 'C');
     // Línea 2: fecha/hora y usuario
-    $this->SetFont('helvetica', '', 8.5);
+    $this->SetFont('helvetica', '', 7.8);
     $this->Cell(0, 5, 'Fecha y hora: '.$this->exportDatetime.'  |  Usuario: '.$this->exportUser.'  ('.$this->exportRole.')', 0, 0, 'C');
   }
 }
@@ -127,8 +139,14 @@ try {
   // ---------- TOTALES ----------
   $totalRegistros = count($rows);
   $totalMonto = 0.00;
+  $totalMontoBs = 0.00;
+  $tieneMontoBs = false;
   foreach ($rows as $r) {
     $totalMonto += (float)$r['monto_total'];
+    if ($r['monto_total_bs'] !== null) {
+      $totalMontoBs += (float)$r['monto_total_bs'];
+      $tieneMontoBs = true;
+    }
   }
 
   // ---------- CONFIG TCPDF ----------
@@ -136,7 +154,7 @@ try {
   $pdf->SetCreator('Sistema Web Posada Las Mandarinas');
   $pdf->SetAuthor('Posada Las Mandarinas');
   $pdf->SetTitle('Reporte de Reservas');
-  $pdf->SetMargins(10, 28, 10);
+  $pdf->SetMargins(8, 32, 8);
   $pdf->SetAutoPageBreak(true, 18);
 
   // Pasar variables de footer a la instancia
@@ -187,20 +205,21 @@ try {
 
   // ---------- TABLA (SIN #, SIN Estado, SIN Origen) ----------
   $theadBg = 'background-color:#ba3b0a; color:#ffffff;';
-  $thStyle = 'padding:6px; font-size:10px; '.$theadBg.' text-align:center;';
-  $tdStyle = 'padding:5px; font-size:9px; border-bottom:1px solid #dddddd;';
+  $thStyle = 'padding:4px; font-size:7.6px; '.$theadBg.' text-align:center;';
+  $tdBaseStyle = 'padding:3.5px; font-size:7.4px; border-bottom:1px solid #dddddd;';
 
   $html = '
   <table width="100%" border="0" cellpadding="0" cellspacing="0">
     <thead>
       <tr>
-        <th style="'.$thStyle.'">Habitación</th>
-        <th style="'.$thStyle.'">Cliente</th>
-        <th style="'.$thStyle.'">Llegada</th>
-        <th style="'.$thStyle.'">Salida</th>
-        <th style="'.$thStyle.'">Personas</th>
-        <th style="'.$thStyle.'">Método</th>
-        <th style="'.$thStyle.'">Monto</th>
+        <th width="8%" style="'.$thStyle.'">Hab.</th>
+        <th width="21%" style="'.$thStyle.'">Cliente</th>
+        <th width="15%" style="'.$thStyle.'">Llegada</th>
+        <th width="15%" style="'.$thStyle.'">Salida</th>
+        <th width="8%" style="'.$thStyle.'">Pers.</th>
+        <th width="12%" style="'.$thStyle.'">Método</th>
+        <th width="10%" style="'.$thStyle.'">Monto Total</th>
+        <th width="11%" style="'.$thStyle.'">Monto Total Bs.</th>
       </tr>
     </thead>
     <tbody>
@@ -209,13 +228,13 @@ try {
   if (!$rows) {
     $html .= '
       <tr>
-        <td colspan="7" style="padding:10px; text-align:center; font-size:10px;">
+        <td colspan="8" style="padding:10px; text-align:center; font-size:10px;">
           No hay resultados para los filtros seleccionados.
         </td>
       </tr>
     ';
   } else {
-    foreach ($rows as $r) {
+    foreach ($rows as $i => $r) {
       $cli = htmlspecialchars(trim(($r['nombres_cliente'] ?? '').' '.($r['apellidos_cliente'] ?? '')), ENT_QUOTES, 'UTF-8');
       $hab = htmlspecialchars($r['nombre_habitacion'] ?? '', ENT_QUOTES, 'UTF-8');
       $met = htmlspecialchars($r['nombre_metodo_pago'] ?? '', ENT_QUOTES, 'UTF-8');
@@ -227,16 +246,22 @@ try {
 
       $cant  = (int)($r['cantidad_personas'] ?? 0);
       $monto = number_format((float)($r['monto_total'] ?? 0), 2, ',', '.');
+      $montoBs = $r['monto_total_bs'] !== null
+        ? 'Bs. ' . number_format((float)$r['monto_total_bs'], 2, ',', '.')
+        : '—';
+      $rowBg = ($i % 2 === 0) ? '#ffffff' : '#f4f4f4';
+      $tdStyle = $tdBaseStyle . ' background-color:'.$rowBg.';';
 
       $html .= '
         <tr>
-          <td style="'.$tdStyle.' text-align:center;">'.$hab.'</td>
-          <td style="'.$tdStyle.'">'.$cli.'</td>
-          <td style="'.$tdStyle.' text-align:center;">'.$llegada.'</td>
-          <td style="'.$tdStyle.' text-align:center;">'.$salida.'</td>
-          <td style="'.$tdStyle.' text-align:center;">'.$cant.'</td>
-          <td style="'.$tdStyle.' text-align:center;">'.$met.'</td>
-          <td style="'.$tdStyle.' text-align:right;"><strong>$ '.$monto.'</strong></td>
+          <td width="8%" style="'.$tdStyle.' text-align:center;">'.$hab.'</td>
+          <td width="21%" style="'.$tdStyle.'">'.$cli.'</td>
+          <td width="15%" style="'.$tdStyle.' text-align:center;">'.$llegada.'</td>
+          <td width="15%" style="'.$tdStyle.' text-align:center;">'.$salida.'</td>
+          <td width="8%" style="'.$tdStyle.' text-align:center;">'.$cant.'</td>
+          <td width="12%" style="'.$tdStyle.' text-align:center;">'.$met.'</td>
+          <td width="10%" style="'.$tdStyle.' text-align:right;"><strong>$ '.$monto.'</strong></td>
+          <td width="11%" style="'.$tdStyle.' text-align:right;"><strong>'.$montoBs.'</strong></td>
         </tr>
       ';
     }
@@ -264,7 +289,8 @@ try {
   $resumenHtml = '
     <div>
       <span style="'.$badgeStyle.'"><strong>Total de reservas:</strong> '.$totalRegistros.'</span>
-      <span style="'.$badgeStyle.'"><strong>Acumulado:</strong> $ '.number_format($totalMonto, 2, ',', '.').'</span>
+      <span style="'.$badgeStyle.'"><strong>Acumulado USD:</strong> $ '.number_format($totalMonto, 2, ',', '.').'</span>
+      <span style="'.$badgeStyle.'"><strong>Acumulado Bs:</strong> '.($tieneMontoBs ? 'Bs. '.number_format($totalMontoBs, 2, ',', '.') : '—').'</span>
     </div>
   ';
   $pdf->writeHTML($resumenHtml, true, false, true, false, '');
@@ -273,8 +299,9 @@ try {
   bitacora_log($pdo, 'Reportes', 'exportar', [
     'seccion' => 'reservas',
     'filtros' => ['desde' => $desde, 'hasta' => $hasta, 'estado' => $estado],
-    'total'   => $totalRegistros,
-    'monto'   => round($totalMonto, 2)
+    'total'    => $totalRegistros,
+    'monto'    => round($totalMonto, 2),
+    'monto_bs' => $tieneMontoBs ? round($totalMontoBs, 2) : null
   ], 'OK');
 
   // ---------- SALIDA ----------

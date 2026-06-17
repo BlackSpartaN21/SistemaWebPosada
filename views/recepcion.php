@@ -191,6 +191,15 @@ try {
 .vencida {
     background-color: #fff3cd !important; /* amarillo claro */
 }
+.conversion-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: .75rem;
+}
+.tasa-status {
+    font-size: .85rem;
+}
 
   </style>
   </head>
@@ -324,6 +333,9 @@ if ($esOcupada && isset($habitacion['fecha_salida'])) {
 
 <input type="hidden" name="id_habitacion" value="<?php echo $habitacion['id_habitacion']; ?>">
 <input type="hidden" name="origen_reserva" value="Recepción"> <!-- o el valor que quieras -->
+<input type="hidden" name="modo_tasa_conversion" id="modoTasaConversionHidden<?php echo $habitacion['id_habitacion']; ?>" value="api">
+<input type="hidden" name="tasa_conversion" id="tasaConversionHidden<?php echo $habitacion['id_habitacion']; ?>" value="">
+<input type="hidden" name="monto_total_bs_estimado" id="montoTotalBsHidden<?php echo $habitacion['id_habitacion']; ?>" value="">
 
               <div class="mb-3">
     <label for="selectCliente<?php echo $habitacion['id_habitacion']; ?>" class="form-label"><i class="fas fa-user"></i> Seleccionar Cliente</label>
@@ -390,6 +402,71 @@ if ($esOcupada && isset($habitacion['fecha_salida'])) {
   </div>
 </div>
 
+<!-- Conversión a bolívares -->
+<div class="mb-3 conversion-card">
+  <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+    <label class="form-label mb-0">
+      <i class="fas fa-money-bill-transfer"></i> Conversión a bolívares
+    </label>
+    <button type="button"
+            class="btn btn-sm btn-outline-primary btn-tasa-api"
+            id="btnTasaApi<?php echo $habitacion['id_habitacion']; ?>"
+            data-id="<?php echo $habitacion['id_habitacion']; ?>">
+      Usar tasa BCV
+    </button>
+  </div>
+
+  <div class="mb-2">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input modo-tasa"
+             type="radio"
+             name="modo_tasa_conversion_<?php echo $habitacion['id_habitacion']; ?>"
+             id="modoTasaApi<?php echo $habitacion['id_habitacion']; ?>"
+             value="api"
+             checked>
+      <label class="form-check-label" for="modoTasaApi<?php echo $habitacion['id_habitacion']; ?>">
+        Automática oficial BCV
+      </label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input modo-tasa"
+             type="radio"
+             name="modo_tasa_conversion_<?php echo $habitacion['id_habitacion']; ?>"
+             id="modoTasaManual<?php echo $habitacion['id_habitacion']; ?>"
+             value="manual">
+      <label class="form-check-label" for="modoTasaManual<?php echo $habitacion['id_habitacion']; ?>">
+        Manual
+      </label>
+    </div>
+  </div>
+
+  <label for="tasaConversion<?php echo $habitacion['id_habitacion']; ?>" class="form-label small mb-1">
+    Tasa de conversión (Bs/USD)
+  </label>
+  <input type="number"
+         step="0.0001"
+         min="0.0001"
+         class="form-control form-control-sm tasa-conversion"
+         id="tasaConversion<?php echo $habitacion['id_habitacion']; ?>"
+         placeholder="Consultando tasa oficial..."
+         readonly>
+
+  <div id="estadoTasa<?php echo $habitacion['id_habitacion']; ?>" class="form-text tasa-status text-muted">
+    Se usará el dólar oficial de DolarApi/BCV cuando esté disponible.
+  </div>
+
+  <div class="row mt-2 small">
+    <div class="col-12 col-md-6">
+      <strong>Tarifa en Bs:</strong>
+      <span id="precioBsResultado<?php echo $habitacion['id_habitacion']; ?>">...</span>
+    </div>
+    <div class="col-12 col-md-6">
+      <strong>Total en Bs:</strong>
+      <span id="montoBsResultado<?php echo $habitacion['id_habitacion']; ?>">...</span>
+    </div>
+  </div>
+</div>
+
 
 <!-- Check para personalizar fechas -->
 <div class="form-check mb-3">
@@ -423,7 +500,7 @@ if ($esOcupada && isset($habitacion['fecha_salida'])) {
 
   <!-- Mostrar cantidad de días -->
 <div class="col-12 mt-2">
-  <div id="diasEstadia<?php echo $habitacion['id_habitacion']; ?>" class="alert alert-info p-2 d-none">
+  <div id="diasEstadiaResumen<?php echo $habitacion['id_habitacion']; ?>" class="alert alert-info p-2 d-none">
     Días de estadía: <span class="num-dias">0</span>
   </div>
 </div>
@@ -674,7 +751,24 @@ function actualizarFechaSalidaTexto<?php echo $id; ?>() {
 
 
 
-  $('#tipoTarifa<?php echo $id; ?>').on('change', actualizarPrecioYTotal<?php echo $id; ?>);
+  $('#btnTasaApi<?php echo $id; ?>').on('click', cargarTasaApi<?php echo $id; ?>);
+$('#modoTasaApi<?php echo $id; ?>, #modoTasaManual<?php echo $id; ?>').on('change', function () {
+  activarModoTasa<?php echo $id; ?>($(this).val());
+});
+$('#tasaConversion<?php echo $id; ?>').on('input change', function () {
+  if ($('#modoTasaManual<?php echo $id; ?>').is(':checked')) {
+    const tasaManual = parseFloat($(this).val());
+    tasaActual<?php echo $id; ?> = isNaN(tasaManual) ? 0 : tasaManual;
+    $('#tasaConversionHidden<?php echo $id; ?>').val(tasaActual<?php echo $id; ?> > 0 ? tasaActual<?php echo $id; ?>.toFixed(4) : '');
+    actualizarConversionBs<?php echo $id; ?>();
+  }
+});
+$('#modalHabitacion<?php echo $id; ?>').on('shown.bs.modal', function () {
+  if ($('#modoTasaApi<?php echo $id; ?>').is(':checked') && (!tasaActual<?php echo $id; ?> || tasaActual<?php echo $id; ?> <= 0)) {
+    cargarTasaApi<?php echo $id; ?>();
+  }
+});
+$('#tipoTarifa<?php echo $id; ?>').on('change', actualizarPrecioYTotal<?php echo $id; ?>);
   $('#fechaLlegada<?php echo $id; ?>').on('change', actualizarPrecioYTotal<?php echo $id; ?>);
   $('#fechaSalida<?php echo $id; ?>').on('change', actualizarPrecioYTotal<?php echo $id; ?>);
 
@@ -702,6 +796,129 @@ function actualizarCamposSegunTarifa<?php echo $id; ?>() {
   }
 }
 
+// Conversión USD -> Bs para esta habitación
+let precioUsdActual<?php echo $id; ?> = 0;
+let montoUsdActual<?php echo $id; ?> = 0;
+let tasaActual<?php echo $id; ?> = 0;
+
+const formatoMoneda<?php echo $id; ?> = new Intl.NumberFormat('es-VE', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+function formatearUsd<?php echo $id; ?>(valor) {
+  return formatoMoneda<?php echo $id; ?>.format(Number(valor || 0)) + ' $';
+}
+
+function formatearBs<?php echo $id; ?>(valor) {
+  return 'Bs. ' + formatoMoneda<?php echo $id; ?>.format(Number(valor || 0));
+}
+
+function actualizarConversionBs<?php echo $id; ?>() {
+  const precioBsDiv = $('#precioBsResultado<?php echo $id; ?>');
+  const montoBsDiv = $('#montoBsResultado<?php echo $id; ?>');
+  const tasaHidden = $('#tasaConversionHidden<?php echo $id; ?>');
+  const montoBsHidden = $('#montoTotalBsHidden<?php echo $id; ?>');
+
+  if (!tasaActual<?php echo $id; ?> || tasaActual<?php echo $id; ?> <= 0) {
+    precioBsDiv.text('Sin tasa');
+    montoBsDiv.text('Sin tasa');
+    tasaHidden.val('');
+    montoBsHidden.val('');
+    return;
+  }
+
+  const precioBs = precioUsdActual<?php echo $id; ?> * tasaActual<?php echo $id; ?>;
+  const montoBs = montoUsdActual<?php echo $id; ?> * tasaActual<?php echo $id; ?>;
+
+  precioBsDiv.text(formatearBs<?php echo $id; ?>(precioBs));
+  montoBsDiv.text(formatearBs<?php echo $id; ?>(montoBs));
+  tasaHidden.val(tasaActual<?php echo $id; ?>.toFixed(4));
+  montoBsHidden.val(montoBs.toFixed(2));
+
+  if (montoUsdActual<?php echo $id; ?> > 0) {
+    $('#montoTotal<?php echo $id; ?>').html(
+      '<div>' + formatearUsd<?php echo $id; ?>(montoUsdActual<?php echo $id; ?>) + '</div>' +
+      '<div class="fs-6 text-muted">' + formatearBs<?php echo $id; ?>(montoBs) + '</div>'
+    );
+  }
+}
+
+function aplicarTasa<?php echo $id; ?>(tasa, modo, mensaje, claseTexto) {
+  tasaActual<?php echo $id; ?> = Number(tasa || 0);
+  $('#tasaConversion<?php echo $id; ?>').val(tasaActual<?php echo $id; ?> > 0 ? tasaActual<?php echo $id; ?>.toFixed(4) : '');
+  $('#modoTasaConversionHidden<?php echo $id; ?>').val(modo);
+  $('#estadoTasa<?php echo $id; ?>')
+    .removeClass('text-muted text-success text-warning text-danger')
+    .addClass(claseTexto || 'text-muted')
+    .text(mensaje || '');
+  actualizarConversionBs<?php echo $id; ?>();
+}
+
+function cargarTasaApi<?php echo $id; ?>() {
+  const btn = $('#btnTasaApi<?php echo $id; ?>');
+  const input = $('#tasaConversion<?php echo $id; ?>');
+
+  btn.prop('disabled', true).text('Consultando...');
+  input.prop('readonly', true).attr('placeholder', 'Consultando tasa oficial...');
+  $('#estadoTasa<?php echo $id; ?>')
+    .removeClass('text-muted text-success text-warning text-danger')
+    .addClass('text-muted')
+    .text('Consultando dólar oficial...');
+
+  $.ajax({
+    url: '../controllers/obtener_tasa_bcv.php',
+    type: 'GET',
+    dataType: 'json',
+    cache: false,
+    success: function (resp) {
+      if (!resp || resp.ok !== true || !resp.tasa) {
+        aplicarTasa<?php echo $id; ?>(0, 'api', 'No se recibió una tasa válida. Puedes usar tasa manual.', 'text-warning');
+        return;
+      }
+
+      const fecha = resp.fechaActualizacion
+        ? ' Actualizada: ' + new Date(resp.fechaActualizacion).toLocaleString('es-VE')
+        : '';
+      aplicarTasa<?php echo $id; ?>(
+        parseFloat(resp.tasa),
+        'api',
+        'Tasa oficial BCV cargada desde DolarApi.' + fecha,
+        'text-success'
+      );
+    },
+    error: function () {
+      aplicarTasa<?php echo $id; ?>(0, 'api', 'No se pudo consultar la API. Activa la tasa manual.', 'text-warning');
+    },
+    complete: function () {
+      btn.prop('disabled', false).text('Usar tasa BCV');
+    }
+  });
+}
+
+function activarModoTasa<?php echo $id; ?>(modo) {
+  if (modo === 'manual') {
+    $('#tasaConversion<?php echo $id; ?>')
+      .prop('readonly', false)
+      .attr('placeholder', 'Ej: 563.2892')
+      .focus();
+    $('#modoTasaConversionHidden<?php echo $id; ?>').val('manual');
+    $('#estadoTasa<?php echo $id; ?>')
+      .removeClass('text-muted text-success text-warning text-danger')
+      .addClass('text-warning')
+      .text('Modo manual activo. Ingresa la tasa que deseas usar.');
+
+    const tasaManual = parseFloat($('#tasaConversion<?php echo $id; ?>').val());
+    tasaActual<?php echo $id; ?> = isNaN(tasaManual) ? 0 : tasaManual;
+    actualizarConversionBs<?php echo $id; ?>();
+    return;
+  }
+
+  $('#modoTasaConversionHidden<?php echo $id; ?>').val('api');
+  $('#tasaConversion<?php echo $id; ?>').prop('readonly', true);
+  cargarTasaApi<?php echo $id; ?>();
+}
+
 // Actualizar monto total considerando tarifa y días o horas
 function actualizarPrecioYTotal<?php echo $id; ?>() {
   const tipoTarifa = $('#tipoTarifa<?php echo $id; ?>').val();
@@ -710,8 +927,11 @@ function actualizarPrecioYTotal<?php echo $id; ?>() {
   const montoDiv = $('#montoTotal<?php echo $id; ?>');
 
   if (!tipoTarifa) {
+    precioUsdActual<?php echo $id; ?> = 0;
+    montoUsdActual<?php echo $id; ?> = 0;
     precioDiv.text('* Selecciona una tarifa *');
     montoDiv.text('...');
+    actualizarConversionBs<?php echo $id; ?>();
     return;
   }
 
@@ -725,40 +945,47 @@ function actualizarPrecioYTotal<?php echo $id; ?>() {
     success: function (precio) {
       precio = parseFloat(precio);
       if (isNaN(precio)) {
+        precioUsdActual<?php echo $id; ?> = 0;
+        montoUsdActual<?php echo $id; ?> = 0;
         precioDiv.text('Error en precio');
         montoDiv.text('Error en monto');
+        actualizarConversionBs<?php echo $id; ?>();
         return;
       }
 
-      precioDiv.text(precio + ' $');
+      precioUsdActual<?php echo $id; ?> = precio;
+      precioDiv.text(formatearUsd<?php echo $id; ?>(precio));
 
       const llegadaStr = $('#fechaLlegada<?php echo $id; ?>').val();
       const diasEstadia = parseInt($('#diasEstadia<?php echo $id; ?>').val(), 10);
+      let montoUsd = precio;
 
       if (tipoTarifa === '3 Horas') {
-        // Para 3 Horas monto = precio fijo (no importa fechas)
-        montoDiv.text(precio + ' $');
+        montoUsd = precio;
       } else if (tipoTarifa === '24 Horas') {
-        // Para 24 Horas se usa días de estadía (por defecto 1 si no hay)
         const dias = (diasEstadia && diasEstadia > 0) ? diasEstadia : 1;
-        montoDiv.text((dias * precio) + ' $');
+        montoUsd = dias * precio;
       } else {
-        // Para otras tarifas, si hay fechas calcular diferencia, sino precio fijo
         const salidaStr = $('#fechaSalida<?php echo $id; ?>').val();
         if (llegadaStr && salidaStr) {
           const llegada = new Date(llegadaStr);
           const salida = new Date(salidaStr);
           const diffTime = salida - llegada;
           const dias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          montoDiv.text((dias > 0 ? dias : 1) * precio + ' $');
-        } else {
-          montoDiv.text(precio + ' $');
+          montoUsd = (dias > 0 ? dias : 1) * precio;
         }
       }
+
+      montoUsdActual<?php echo $id; ?> = montoUsd;
+      montoDiv.text(formatearUsd<?php echo $id; ?>(montoUsd));
+      actualizarConversionBs<?php echo $id; ?>();
     },
     error: function () {
+      precioUsdActual<?php echo $id; ?> = 0;
+      montoUsdActual<?php echo $id; ?> = 0;
       precioDiv.text('Error al obtener precio');
       montoDiv.text('Error al calcular monto');
+      actualizarConversionBs<?php echo $id; ?>();
     }
   });
 }

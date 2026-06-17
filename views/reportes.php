@@ -6,6 +6,7 @@ if (!isset($_SESSION['id_usuario'])) {
 }
 include '../views/header.php';
 require_once '../config/db.php';
+require_once '../config/reservas_conversion.php';
 
 try {
   $where = [];
@@ -31,6 +32,11 @@ try {
 
   $condiciones = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
+  $tieneColumnasConversion = reservas_tiene_columnas_conversion($pdo);
+  $selectConversion = $tieneColumnasConversion
+      ? "r.monto_total_bs, r.tasa_conversion, r.modo_tasa_conversion,"
+      : "NULL AS monto_total_bs, NULL AS tasa_conversion, NULL AS modo_tasa_conversion,";
+
   $sql = "
       SELECT 
           r.id_reserva,
@@ -45,6 +51,7 @@ try {
           r.cantidad_personas,
           m.nombre_metodo_pago,
           r.monto_total,
+          $selectConversion
           r.estado_reserva,
           r.origen_reserva,
           r.observaciones_reserva
@@ -137,6 +144,7 @@ try {
           <th>Cant.</th>
           <th>Método Pago</th>
           <th>Monto Total</th>
+          <th>Monto Total Bs.</th>
           <th>Estado</th>
         </tr>
       </thead>
@@ -167,7 +175,18 @@ try {
             </td>
             <td><?= (int)$reserva['cantidad_personas'] ?></td>
             <td><?= htmlspecialchars($reserva['nombre_metodo_pago']) ?></td>
-            <td>$<?= number_format($reserva['monto_total'], 2) ?></td>
+            <td>$<?= number_format((float)$reserva['monto_total'], 2) ?></td>
+            <?php
+              $montoBs = $reserva['monto_total_bs'] ?? null;
+              $tasaConversion = $reserva['tasa_conversion'] ?? null;
+              $modoTasa = $reserva['modo_tasa_conversion'] ?? null;
+              $tituloConversion = $montoBs !== null
+                ? 'Tasa usada: ' . number_format((float)$tasaConversion, 4, ',', '.') . ' Bs/USD' . ($modoTasa ? ' | Modo: ' . $modoTasa : '')
+                : 'Sin monto en bolívares guardado';
+            ?>
+            <td data-order="<?= $montoBs !== null ? (float)$montoBs : 0 ?>" title="<?= htmlspecialchars($tituloConversion) ?>">
+              <?= $montoBs !== null ? 'Bs. ' . number_format((float)$montoBs, 2, ',', '.') : '<span class="text-muted">—</span>' ?>
+            </td>
             <td><?= htmlspecialchars($reserva['estado_reserva']) ?></td>
           </tr>
         <?php endforeach; ?>
