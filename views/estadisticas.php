@@ -12,7 +12,9 @@ if (($_SESSION['rol'] ?? $_SESSION['rol_usuario'] ?? '') !== 'Administrador') {
 }
 
 require_once '../config/db.php';
-include '../views/header.php';
+require_once '../config/bitacora.php';
+
+date_default_timezone_set('America/Caracas');
 
 $tipoFiltro = $_GET['tipo'] ?? 'mes';
 $tiposPermitidos = ['dia', 'mes', 'anio'];
@@ -27,6 +29,7 @@ $fechaAnio = $_GET['anio'] ?? date('Y');
 $where = ["r.estado_reserva <> 'Cancelada'"];
 $params = [];
 $tituloPeriodo = '';
+$anioComparacion = date('Y');
 
 switch ($tipoFiltro) {
     case 'dia':
@@ -36,6 +39,7 @@ switch ($tipoFiltro) {
         $where[] = 'DATE(r.fecha_llegada) = :fecha_dia';
         $params[':fecha_dia'] = $fechaDia;
         $tituloPeriodo = date('d-m-Y', strtotime($fechaDia));
+        $anioComparacion = date('Y', strtotime($fechaDia));
         break;
 
     case 'anio':
@@ -45,6 +49,7 @@ switch ($tipoFiltro) {
         $where[] = 'YEAR(r.fecha_llegada) = :fecha_anio';
         $params[':fecha_anio'] = (int)$fechaAnio;
         $tituloPeriodo = $fechaAnio;
+        $anioComparacion = $fechaAnio;
         break;
 
     case 'mes':
@@ -55,19 +60,111 @@ switch ($tipoFiltro) {
         $where[] = "DATE_FORMAT(r.fecha_llegada, '%Y-%m') = :fecha_mes";
         $params[':fecha_mes'] = $fechaMes;
         $tituloPeriodo = date('m-Y', strtotime($fechaMes . '-01'));
+        $anioComparacion = date('Y', strtotime($fechaMes . '-01'));
         break;
 }
 
 $condiciones = 'WHERE ' . implode(' AND ', $where);
 
+$meses = [
+    1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+    5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+    9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+];
+
 try {
-    $stmtResumen = $pdo->prepare("\n        SELECT\n            COUNT(*) AS total_reservas,\n            COALESCE(SUM(r.monto_total), 0) AS total_ventas,\n            COALESCE(AVG(r.monto_total), 0) AS promedio_venta,\n            COUNT(DISTINCT r.id_habitacion) AS habitaciones_vendidas\n        FROM reservas r\n        $condiciones\n    ");
+    $stmtResumen = $pdo->prepare("
+        SELECT
+            COUNT(*) AS total_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas,
+            COALESCE(AVG(r.monto_total), 0) AS promedio_venta,
+            COUNT(DISTINCT r.id_habitacion) AS habitaciones_vendidas
+        FROM reservas r
+        $condiciones
+    ");
     $stmtResumen->execute($params);
     $resumen = $stmtResumen->fetch(PDO::FETCH_ASSOC) ?: [];
 
-    $stmtHabitaciones = $pdo->prepare("\n        SELECT\n            h.id_habitacion,\n            h.nombre_habitacion,\n            th.nombre_tipo_habitacion,\n            COUNT(r.id_reserva) AS cantidad_reservas,\n            COALESCE(SUM(r.monto_total), 0) AS total_ventas\n        FROM reservas r\n        INNER JOIN habitaciones h ON r.id_habitacion = h.id_habitacion\n        INNER JOIN tipo_habitaciones th ON h.id_tipo_habitacion = th.id_tipo_habitacion\n        $condiciones\n        GROUP BY h.id_habitacion, h.nombre_habitacion, th.nombre_tipo_habitacion\n        ORDER BY total_ventas DESC, cantidad_reservas DESC, h.nombre_habitacion ASC\n    ");
+    $stmtHabitaciones = $pdo->prepare("
+        SELECT
+            h.id_habitacion,
+            h.nombre_habitacion,
+            th.nombre_tipo_habitacion,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        INNER JOIN habitaciones h ON r.id_habitacion = h.id_habitacion
+        INNER JOIN tipo_habitaciones th ON h.id_tipo_habitacion = th.id_tipo_habitacion
+        $condiciones
+        GROUP BY h.id_habitacion, h.nombre_habitacion, th.nombre_tipo_habitacion
+        ORDER BY total_ventas DESC, cantidad_reservas DESC, h.nombre_habitacion ASC
+    ");
     $stmtHabitaciones->execute($params);
     $ventasHabitaciones = $stmtHabitaciones->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmtHabitacionMasVendida = $pdo->prepare("
+        SELECT
+            h.nombre_habitacion,
+            th.nombre_tipo_habitacion,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        INNER JOIN habitaciones h ON r.id_habitacion = h.id_habitacion
+        INNER JOIN tipo_habitaciones th ON h.id_tipo_habitacion = th.id_tipo_habitacion
+        $condiciones
+        GROUP BY h.id_habitacion, h.nombre_habitacion, th.nombre_tipo_habitacion
+        ORDER BY cantidad_reservas DESC, total_ventas DESC, h.nombre_habitacion ASC
+        LIMIT 1
+    ");
+    $stmtHabitacionMasVendida->execute($params);
+    $habitacionMasVendida = $stmtHabitacionMasVendida->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    $stmtHabitacionMayorIngreso = $pdo->prepare("
+        SELECT
+            h.nombre_habitacion,
+            th.nombre_tipo_habitacion,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        INNER JOIN habitaciones h ON r.id_habitacion = h.id_habitacion
+        INNER JOIN tipo_habitaciones th ON h.id_tipo_habitacion = th.id_tipo_habitacion
+        $condiciones
+        GROUP BY h.id_habitacion, h.nombre_habitacion, th.nombre_tipo_habitacion
+        ORDER BY total_ventas DESC, cantidad_reservas DESC, h.nombre_habitacion ASC
+        LIMIT 1
+    ");
+    $stmtHabitacionMayorIngreso->execute($params);
+    $habitacionMayorIngreso = $stmtHabitacionMayorIngreso->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    $stmtTarifaMasUsada = $pdo->prepare("
+        SELECT
+            tf.tipo_tarifa,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        INNER JOIN tarifas tf ON r.id_tarifa = tf.id_tarifa
+        $condiciones
+        GROUP BY tf.tipo_tarifa
+        ORDER BY cantidad_reservas DESC, total_ventas DESC
+        LIMIT 1
+    ");
+    $stmtTarifaMasUsada->execute($params);
+    $tarifaMasUsada = $stmtTarifaMasUsada->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    $stmtMetodoMasUsado = $pdo->prepare("
+        SELECT
+            m.nombre_metodo_pago,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        INNER JOIN metodos_de_pago m ON r.id_metodo_pago = m.id_metodo_pago
+        $condiciones
+        GROUP BY m.id_metodo_pago, m.nombre_metodo_pago
+        ORDER BY cantidad_reservas DESC, total_ventas DESC
+        LIMIT 1
+    ");
+    $stmtMetodoMasUsado->execute($params);
+    $metodoMasUsado = $stmtMetodoMasUsado->fetch(PDO::FETCH_ASSOC) ?: null;
 
     $grupoTiempo = $tipoFiltro === 'dia'
         ? "DATE_FORMAT(r.fecha_llegada, '%H:00')"
@@ -77,14 +174,130 @@ try {
         ? 'HOUR(r.fecha_llegada)'
         : ($tipoFiltro === 'anio' ? 'MONTH(r.fecha_llegada)' : 'DAY(r.fecha_llegada)');
 
-    $stmtTiempo = $pdo->prepare("\n        SELECT\n            $grupoTiempo AS etiqueta,\n            COUNT(r.id_reserva) AS cantidad_reservas,\n            COALESCE(SUM(r.monto_total), 0) AS total_ventas\n        FROM reservas r\n        $condiciones\n        GROUP BY etiqueta, $ordenTiempo\n        ORDER BY $ordenTiempo ASC\n    ");
+    $stmtTiempo = $pdo->prepare("
+        SELECT
+            $grupoTiempo AS etiqueta,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        $condiciones
+        GROUP BY etiqueta, $ordenTiempo
+        ORDER BY $ordenTiempo ASC
+    ");
     $stmtTiempo->execute($params);
     $ventasTiempo = $stmtTiempo->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmtDetalle = $pdo->prepare("\n        SELECT\n            r.id_reserva,\n            h.nombre_habitacion,\n            th.nombre_tipo_habitacion,\n            tf.tipo_tarifa,\n            r.fecha_llegada,\n            r.fecha_salida,\n            r.monto_total,\n            r.estado_reserva,\n            m.nombre_metodo_pago,\n            CONCAT(c.nombres_cliente, ' ', c.apellidos_cliente) AS nombre_cliente\n        FROM reservas r\n        INNER JOIN habitaciones h ON r.id_habitacion = h.id_habitacion\n        INNER JOIN tipo_habitaciones th ON h.id_tipo_habitacion = th.id_tipo_habitacion\n        INNER JOIN tarifas tf ON r.id_tarifa = tf.id_tarifa\n        INNER JOIN metodos_de_pago m ON r.id_metodo_pago = m.id_metodo_pago\n        INNER JOIN clientes c ON r.documento_cliente = c.documento_cliente\n        $condiciones\n        ORDER BY r.fecha_llegada DESC\n    ");
+    $stmtComparacionMensual = $pdo->prepare("
+        SELECT
+            MONTH(r.fecha_llegada) AS numero_mes,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        WHERE r.estado_reserva <> 'Cancelada'
+          AND YEAR(r.fecha_llegada) = :anio_comparacion
+        GROUP BY MONTH(r.fecha_llegada)
+        ORDER BY MONTH(r.fecha_llegada) ASC
+    ");
+    $stmtComparacionMensual->execute([':anio_comparacion' => (int)$anioComparacion]);
+    $comparacionRaw = $stmtComparacionMensual->fetchAll(PDO::FETCH_ASSOC);
+
+    $comparacionMensual = [];
+    foreach ($meses as $num => $nombreMes) {
+        $comparacionMensual[$num] = [
+            'numero_mes' => $num,
+            'mes' => $nombreMes,
+            'cantidad_reservas' => 0,
+            'total_ventas' => 0.0,
+        ];
+    }
+    foreach ($comparacionRaw as $row) {
+        $num = (int)$row['numero_mes'];
+        if (isset($comparacionMensual[$num])) {
+            $comparacionMensual[$num]['cantidad_reservas'] = (int)$row['cantidad_reservas'];
+            $comparacionMensual[$num]['total_ventas'] = (float)$row['total_ventas'];
+        }
+    }
+
+    $stmtTopClientes = $pdo->prepare("
+        SELECT
+            c.documento_cliente,
+            CONCAT(c.nombres_cliente, ' ', c.apellidos_cliente) AS nombre_cliente,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas,
+            MAX(r.fecha_llegada) AS ultima_visita
+        FROM reservas r
+        INNER JOIN clientes c ON r.documento_cliente = c.documento_cliente
+        $condiciones
+        GROUP BY c.documento_cliente, c.nombres_cliente, c.apellidos_cliente
+        ORDER BY cantidad_reservas DESC, total_ventas DESC, ultima_visita DESC
+        LIMIT 5
+    ");
+    $stmtTopClientes->execute($params);
+    $topClientes = $stmtTopClientes->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmtDiasMovimiento = $pdo->prepare("
+        SELECT
+            DAYOFWEEK(r.fecha_llegada) AS numero_dia,
+            CASE DAYOFWEEK(r.fecha_llegada)
+                WHEN 1 THEN 'Domingo'
+                WHEN 2 THEN 'Lunes'
+                WHEN 3 THEN 'Martes'
+                WHEN 4 THEN 'Miércoles'
+                WHEN 5 THEN 'Jueves'
+                WHEN 6 THEN 'Viernes'
+                WHEN 7 THEN 'Sábado'
+            END AS nombre_dia,
+            COUNT(r.id_reserva) AS cantidad_reservas,
+            COALESCE(SUM(r.monto_total), 0) AS total_ventas
+        FROM reservas r
+        $condiciones
+        GROUP BY numero_dia, nombre_dia
+        ORDER BY cantidad_reservas DESC, total_ventas DESC, numero_dia ASC
+    ");
+    $stmtDiasMovimiento->execute($params);
+    $diasMovimiento = $stmtDiasMovimiento->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmtDetalle = $pdo->prepare("
+        SELECT
+            r.id_reserva,
+            h.nombre_habitacion,
+            th.nombre_tipo_habitacion,
+            tf.tipo_tarifa,
+            r.fecha_llegada,
+            r.fecha_salida,
+            r.monto_total,
+            r.estado_reserva,
+            m.nombre_metodo_pago,
+            CONCAT(c.nombres_cliente, ' ', c.apellidos_cliente) AS nombre_cliente
+        FROM reservas r
+        INNER JOIN habitaciones h ON r.id_habitacion = h.id_habitacion
+        INNER JOIN tipo_habitaciones th ON h.id_tipo_habitacion = th.id_tipo_habitacion
+        INNER JOIN tarifas tf ON r.id_tarifa = tf.id_tarifa
+        INNER JOIN metodos_de_pago m ON r.id_metodo_pago = m.id_metodo_pago
+        INNER JOIN clientes c ON r.documento_cliente = c.documento_cliente
+        $condiciones
+        ORDER BY r.fecha_llegada DESC
+    ");
     $stmtDetalle->execute($params);
     $detalleVentas = $stmtDetalle->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
+
+    bitacora_log($pdo, 'Estadísticas', 'consultar', [
+        'filtro' => $tipoFiltro,
+        'periodo' => $tituloPeriodo,
+        'anio_comparacion' => $anioComparacion,
+        'total_reservas' => (int)($resumen['total_reservas'] ?? 0),
+        'monto' => round((float)($resumen['total_ventas'] ?? 0), 2)
+    ], 'OK');
+} catch (Throwable $e) {
+    try {
+        bitacora_log($pdo, 'Estadísticas', 'consultar', [
+            'filtro' => $tipoFiltro,
+            'fecha' => $fechaDia,
+            'mes' => $fechaMes,
+            'anio' => $fechaAnio,
+            'ex' => $e->getMessage()
+        ], 'ERROR');
+    } catch (Throwable $ignored) {}
     die('Error al obtener las estadísticas: ' . $e->getMessage());
 }
 
@@ -98,6 +311,25 @@ $maxTiempo = 0;
 foreach ($ventasTiempo as $tiempo) {
     $maxTiempo = max($maxTiempo, (float)$tiempo['total_ventas']);
 }
+
+$maxMensual = 0;
+foreach ($comparacionMensual as $mesData) {
+    $maxMensual = max($maxMensual, (float)$mesData['total_ventas']);
+}
+
+$maxDias = 0;
+foreach ($diasMovimiento as $diaData) {
+    $maxDias = max($maxDias, (int)$diaData['cantidad_reservas']);
+}
+
+function estadistica_valor_card(?array $dato, string $campo, string $vacio = 'Sin datos'): string {
+    if (!$dato || empty($dato[$campo])) {
+        return $vacio;
+    }
+    return (string)$dato[$campo];
+}
+
+include '../views/header.php';
 ?>
 
 <link rel="stylesheet" href="../public/css/datatables.min.css">
@@ -128,6 +360,16 @@ foreach ($ventasTiempo as $tiempo) {
         background: #FFE6E0;
         color: #BA3B0A;
         font-size: 20px;
+        flex: 0 0 auto;
+    }
+
+    .stat-card h4, .stat-card h5 {
+        color: #222;
+    }
+
+    .metric-detail {
+        font-size: 12px;
+        color: #6c757d;
     }
 
     .chart-box {
@@ -136,11 +378,16 @@ foreach ($ventasTiempo as $tiempo) {
         border-radius: 16px;
         padding: 18px;
         background: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    }
+
+    .chart-box-sm {
+        min-height: 270px;
     }
 
     .bar-row {
         display: grid;
-        grid-template-columns: 120px 1fr 100px;
+        grid-template-columns: 125px 1fr 105px;
         align-items: center;
         gap: 12px;
         margin-bottom: 13px;
@@ -194,12 +441,28 @@ foreach ($ventasTiempo as $tiempo) {
     }
 
     .empty-state {
-        min-height: 180px;
+        min-height: 160px;
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
         color: #6c757d;
+    }
+
+    .ranking-number {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #FFE6E0;
+        color: #BA3B0A;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .table thead th {
+        vertical-align: middle;
     }
 
     @media print {
@@ -223,7 +486,6 @@ foreach ($ventasTiempo as $tiempo) {
 
         table {
             font-size: 11px;
-            
         }
     }
 </style>
@@ -241,7 +503,7 @@ foreach ($ventasTiempo as $tiempo) {
                 <input type="hidden" name="mes" value="<?= htmlspecialchars($fechaMes) ?>">
                 <input type="hidden" name="anio" value="<?= htmlspecialchars($fechaAnio) ?>">
                 <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-file-pdf me-1"></i> Imprimir PDF
+                    <i class="fas fa-file-pdf me-1"></i> Exportar PDF completo
                 </button>
             </form>
         </div>
@@ -278,7 +540,7 @@ foreach ($ventasTiempo as $tiempo) {
         <div class="row g-3 mb-4">
             <div class="col-md-3">
                 <div class="card stat-card h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
                         <div>
                             <p class="text-muted mb-1">Total ventas</p>
                             <h4 class="mb-0">$<?= number_format($totalVentas, 2) ?></h4>
@@ -289,7 +551,7 @@ foreach ($ventasTiempo as $tiempo) {
             </div>
             <div class="col-md-3">
                 <div class="card stat-card h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
                         <div>
                             <p class="text-muted mb-1">Reservas</p>
                             <h4 class="mb-0"><?= (int)($resumen['total_reservas'] ?? 0) ?></h4>
@@ -300,7 +562,7 @@ foreach ($ventasTiempo as $tiempo) {
             </div>
             <div class="col-md-3">
                 <div class="card stat-card h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
                         <div>
                             <p class="text-muted mb-1">Promedio</p>
                             <h4 class="mb-0">$<?= number_format((float)($resumen['promedio_venta'] ?? 0), 2) ?></h4>
@@ -311,12 +573,75 @@ foreach ($ventasTiempo as $tiempo) {
             </div>
             <div class="col-md-3">
                 <div class="card stat-card h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
                         <div>
-                            <p class="text-muted mb-1">Habitaciones Alquiladas</p>
+                            <p class="text-muted mb-1">Habitaciones alquiladas</p>
                             <h4 class="mb-0"><?= (int)($resumen['habitaciones_vendidas'] ?? 0) ?></h4>
                         </div>
                         <span class="icono"><i class="fas fa-bed"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                        <div>
+                            <p class="text-muted mb-1">Habitación más vendida</p>
+                            <h5 class="mb-0">
+                                <?= $habitacionMasVendida ? 'Hab. ' . htmlspecialchars($habitacionMasVendida['nombre_habitacion']) : 'Sin datos' ?>
+                            </h5>
+                            <div class="metric-detail">
+                                <?= $habitacionMasVendida ? ((int)$habitacionMasVendida['cantidad_reservas'] . ' venta(s)') : '0 venta(s)' ?>
+                            </div>
+                        </div>
+                        <span class="icono"><i class="fas fa-ranking-star"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                        <div>
+                            <p class="text-muted mb-1">Habitación mayor ingreso</p>
+                            <h5 class="mb-0">
+                                <?= $habitacionMayorIngreso ? 'Hab. ' . htmlspecialchars($habitacionMayorIngreso['nombre_habitacion']) : 'Sin datos' ?>
+                            </h5>
+                            <div class="metric-detail">
+                                <?= $habitacionMayorIngreso ? ('$' . number_format((float)$habitacionMayorIngreso['total_ventas'], 2)) : '$0.00' ?>
+                            </div>
+                        </div>
+                        <span class="icono"><i class="fas fa-sack-dollar"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                        <div>
+                            <p class="text-muted mb-1">Tarifa más usada</p>
+                            <h5 class="mb-0"><?= $tarifaMasUsada ? htmlspecialchars($tarifaMasUsada['tipo_tarifa']) : 'Sin datos' ?></h5>
+                            <div class="metric-detail">
+                                <?= $tarifaMasUsada ? ((int)$tarifaMasUsada['cantidad_reservas'] . ' venta(s)') : '0 venta(s)' ?>
+                            </div>
+                        </div>
+                        <span class="icono"><i class="fas fa-clock"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between gap-2">
+                        <div>
+                            <p class="text-muted mb-1">Método más usado</p>
+                            <h5 class="mb-0"><?= $metodoMasUsado ? htmlspecialchars($metodoMasUsado['nombre_metodo_pago']) : 'Sin datos' ?></h5>
+                            <div class="metric-detail">
+                                <?= $metodoMasUsado ? ((int)$metodoMasUsado['cantidad_reservas'] . ' pago(s)') : '0 pago(s)' ?>
+                            </div>
+                        </div>
+                        <span class="icono"><i class="fas fa-credit-card"></i></span>
                     </div>
                 </div>
             </div>
@@ -373,6 +698,112 @@ foreach ($ventasTiempo as $tiempo) {
             </div>
         </div>
 
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="chart-box chart-box-sm">
+                    <h5 class="mb-3"><i class="fas fa-calendar-days me-2"></i>Comparación mensual del año <?= htmlspecialchars((string)$anioComparacion) ?></h5>
+                    <div class="vertical-chart">
+                        <?php foreach ($comparacionMensual as $mesData):
+                            $valor = (float)$mesData['total_ventas'];
+                            $alto = $maxMensual > 0 ? max(4, ($valor / $maxMensual) * 190) : 4;
+                            $abreviado = substr($mesData['mes'], 0, 3);
+                        ?>
+                            <div class="vertical-item" title="<?= htmlspecialchars($mesData['mes']) ?>: $<?= number_format($valor, 2) ?> / <?= (int)$mesData['cantidad_reservas'] ?> reserva(s)">
+                                <small>$<?= number_format($valor, 0) ?></small>
+                                <div class="vertical-bar" style="height: <?= number_format($alto, 2, '.', '') ?>px;"></div>
+                                <span class="vertical-label"><?= htmlspecialchars($abreviado) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-box chart-box-sm">
+                    <h5 class="mb-3"><i class="fas fa-calendar-week me-2"></i>Días con mayor movimiento</h5>
+                    <?php if (empty($diasMovimiento)): ?>
+                        <div class="empty-state">No hay movimiento en el periodo seleccionado.</div>
+                    <?php else: ?>
+                        <?php foreach ($diasMovimiento as $dia):
+                            $cantidad = (int)$dia['cantidad_reservas'];
+                            $porcentaje = $maxDias > 0 ? max(4, ($cantidad / $maxDias) * 100) : 0;
+                        ?>
+                            <div class="bar-row" style="grid-template-columns: 100px 1fr 80px;">
+                                <div><strong><?= htmlspecialchars($dia['nombre_dia']) ?></strong></div>
+                                <div class="bar-track" title="<?= $cantidad ?> reserva(s)">
+                                    <div class="bar-fill" style="width: <?= number_format($porcentaje, 2, '.', '') ?>%;"></div>
+                                </div>
+                                <div class="text-end"><strong><?= $cantidad ?></strong><br><small>$<?= number_format((float)$dia['total_ventas'], 2) ?></small></div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-box chart-box-sm">
+                    <h5 class="mb-3"><i class="fas fa-users me-2"></i>Top 5 clientes frecuentes</h5>
+                    <?php if (empty($topClientes)): ?>
+                        <div class="empty-state">No hay clientes registrados en el periodo seleccionado.</div>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Cliente</th>
+                                        <th class="text-center">Reservas</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($topClientes as $i => $cliente): ?>
+                                        <tr>
+                                            <td><span class="ranking-number"><?= $i + 1 ?></span></td>
+                                            <td>
+                                                <strong><?= htmlspecialchars($cliente['nombre_cliente']) ?></strong><br>
+                                                <small class="text-muted">Doc. <?= htmlspecialchars($cliente['documento_cliente']) ?></small>
+                                            </td>
+                                            <td class="text-center"><?= (int)$cliente['cantidad_reservas'] ?></td>
+                                            <td class="text-end"><strong>$<?= number_format((float)$cliente['total_ventas'], 2) ?></strong></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-box chart-box-sm">
+                    <h5 class="mb-3"><i class="fas fa-lightbulb me-2"></i>Análisis administrativo</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <span>Habitación más vendida</span>
+                            <strong><?= $habitacionMasVendida ? 'Hab. ' . htmlspecialchars($habitacionMasVendida['nombre_habitacion']) . ' (' . (int)$habitacionMasVendida['cantidad_reservas'] . ')' : 'Sin datos' ?></strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <span>Mayor ingreso</span>
+                            <strong><?= $habitacionMayorIngreso ? 'Hab. ' . htmlspecialchars($habitacionMayorIngreso['nombre_habitacion']) . ' ($' . number_format((float)$habitacionMayorIngreso['total_ventas'], 2) . ')' : 'Sin datos' ?></strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <span>Tarifa predominante</span>
+                            <strong><?= $tarifaMasUsada ? htmlspecialchars($tarifaMasUsada['tipo_tarifa']) : 'Sin datos' ?></strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <span>Método de pago dominante</span>
+                            <strong><?= $metodoMasUsado ? htmlspecialchars($metodoMasUsado['nombre_metodo_pago']) : 'Sin datos' ?></strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <span>Día con mayor movimiento</span>
+                            <strong><?= !empty($diasMovimiento) ? htmlspecialchars($diasMovimiento[0]['nombre_dia']) . ' (' . (int)$diasMovimiento[0]['cantidad_reservas'] . ')' : 'Sin datos' ?></strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <h5 class="mb-3"><i class="fas fa-table me-2"></i>Detalle de ventas</h5>
             <table id="tablaEstadisticas" class="table table-bordered table-hover table-striped" data-page-length="25">
@@ -401,8 +832,8 @@ foreach ($ventasTiempo as $tiempo) {
                             <td><?= htmlspecialchars($venta['nombre_habitacion']) ?></td>
                             <td><?= htmlspecialchars($venta['nombre_tipo_habitacion']) ?></td>
                             <td><?= htmlspecialchars($venta['tipo_tarifa']) ?></td>
-                            <td data-order="<?= date('Y-m-d H:i:s', $tsLlegada) ?>"><?= date('d-m-Y h:i A', $tsLlegada) ?></td>
-                            <td data-order="<?= date('Y-m-d H:i:s', $tsSalida) ?>"><?= date('d-m-Y h:i A', $tsSalida) ?></td>
+                            <td data-order="<?= $tsLlegada ? date('Y-m-d H:i:s', $tsLlegada) : '' ?>"><?= $tsLlegada ? date('d-m-Y h:i A', $tsLlegada) : '' ?></td>
+                            <td data-order="<?= $tsSalida ? date('Y-m-d H:i:s', $tsSalida) : '' ?>"><?= $tsSalida ? date('d-m-Y h:i A', $tsSalida) : '' ?></td>
                             <td><?= htmlspecialchars($venta['nombre_metodo_pago']) ?></td>
                             <td><?= htmlspecialchars($venta['estado_reserva']) ?></td>
                             <td>$<?= number_format((float)$venta['monto_total'], 2) ?></td>
