@@ -17,7 +17,7 @@ const chatData = {
         ]
     },
     precios: {
-        texto: "Contamos con excelentes tarifas adaptadas a tu estadía:\n\n• Tiempo corto: 5$\n• Habitación Matrimonial: 10$\n• Habitación Triple: 15$",
+        texto: "Contamos con excelentes tarifas adaptadas a tu estadía:\n\n• Tiempo corto: 5$\n• Habitación Matrimonial por noche: 10$\n• Habitación Triple por noche: 15$",
         opciones: [
             { texto: "🏠 Volver al menú", siguiente: "inicio" }
         ]
