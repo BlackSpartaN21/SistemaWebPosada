@@ -3,9 +3,17 @@ const chatData = {
         texto: "¡Hola! Bienvenido a la asistencia en línea de la Posada Turística Las Mandarinas. ¿En qué puedo ayudarte hoy?",
         opciones: [
             { texto: "💰 Precios de habitaciones", siguiente: "precios" },
+            { texto: "📅 Quiero realizar una reserva", siguiente: "reserva" }, // <-- NUEVA OPCIÓN
             { texto: "📍 Dirección y Ubicación", siguiente: "direccion" },
             { texto: "⏰ Horario de atención", siguiente: "horario" },
             { texto: "🏔️ Lugares cercanos de interés", siguiente: "turismo" }
+        ]
+    },
+    reserva: {
+        // Aquí puedes cambiar el enlace '#' por tu link real de WhatsApp más adelante
+        texto: "¡Excelente! Nos encantaría recibirte en nuestra posada. Actualmente gestionamos todas nuestras reservas de forma directa y personalizada a través de WhatsApp.<br><br>Haz clic en el siguiente enlace para comunicarte con nosotros:<br><br><a href='https://wa.me/584264731506?text=Hola%20quiero%20reservar%20una%20habitaci%C3%B3n' target='_blank' style='display: inline-block; background-color: #25D366; color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0px 2px 5px rgba(0,0,0,0.2);'>🟢 Reservar por WhatsApp</a>",
+        opciones: [
+            { texto: "🏠 Volver al menú", siguiente: "inicio" }
         ]
     },
     precios: {
@@ -73,6 +81,9 @@ function cargarNodo(nodoClave) {
     
     const botDiv = document.createElement('div');
     botDiv.className = 'msg bot-msg';
+    
+    // CAMBIO IMPORTANTE: Ahora usamos .innerHTML en vez de .innerText 
+    // Esto permite que el chat renderice el botón con el enlace a WhatsApp correctamente.
     botDiv.innerHTML = nodo.texto.replace(/\n/g, '<br>');
     chatBox.appendChild(botDiv);
     
