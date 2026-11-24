@@ -39,7 +39,17 @@
 
 <div class="container my-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fas fa-users-cog me-2"></i>Gestionar Usuarios</h4>
+    <h2 class="mb-0">
+    <i class="fas fa-users-cog me-2"></i>Gestionar Usuarios
+
+    <span class="module-help"
+          tabindex="0"
+          role="button"
+          aria-expanded="false"
+          data-help="Desde este módulo puedes consultar los usuarios registrados en el sistema, crear nuevas cuentas, modificar sus datos y gestionar sus permisos de acceso según el rol asignado.">
+        <i class="fas fa-question-circle"></i>
+    </span>
+</h2>
     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
       <i class="fas fa-user-plus me-1"></i>Nuevo usuario
     </button>
@@ -301,7 +311,60 @@
     </form>
   </div>
 </div>
+<style>
+  .module-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #a0a0a0;
+    font-size: 17px;
+    margin-left: 5px;
+    cursor: help;
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
 
+.module-help:hover {
+    color: #0d6efd;
+}
+
+.module-help:focus:not(:hover) {
+    color: #a0a0a0;
+    outline: none;
+}
+
+.module-help::after {
+    content: attr(data-help);
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translate(-50%, -5px);
+    width: 290px;
+    padding: 12px 15px;
+    background: #ffffff;
+    color: #444;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.module-help:hover::after,
+.module-help.active::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+  </style>
 <script>
   $(function () {
     const CURRENT_USER_ID = <?php echo $currentUserId; ?>;
