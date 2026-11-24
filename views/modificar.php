@@ -58,11 +58,75 @@ include 'header.php';
   /* Asegura ancho completo del wrapper y la tabla */
   div.dataTables_wrapper { width: 100%; }
   table.dataTable { width: 100% !important; }
+
+  .module-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #a0a0a0;
+    font-size: 17px;
+    margin-left: 5px;
+    cursor: help;
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
+
+.module-help:hover {
+    color: #0d6efd;
+}
+
+.module-help:focus:not(:hover) {
+    color: #a0a0a0;
+    outline: none;
+}
+
+.module-help::after {
+    content: attr(data-help);
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translate(-50%, -5px);
+    width: 290px;
+    padding: 12px 15px;
+    background: #ffffff;
+    color: #444;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.module-help:hover::after,
+.module-help.active::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
 </style>
 
 <div class="container-fluid container-fluid-wide my-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fas fa-users-cog me-2"></i>Modificar clientes</h4>
+    <h4 class="mb-0">
+    <i class="fas fa-users-cog me-2"></i>Modificar clientes
+
+    <span class="module-help"
+          tabindex="0"
+          role="button"
+          aria-expanded="false"
+          data-help="Desde este módulo puedes consultar los clientes registrados, buscar sus datos, agregar nuevos clientes y modificar su información personal cuando sea necesario.">
+        <i class="fas fa-question-circle"></i>
+    </span>
+</h4>
     <button type="button" class="btn btn-success" id="btnNuevoCliente" data-bs-toggle="modal" data-bs-target="#clienteModal">
       <i class="fas fa-user-plus"></i> Nuevo cliente
     </button>
@@ -283,4 +347,6 @@ $(function(){
                (type === 'warning' ? 'warning' : 'info')));
   Swal.fire({ icon, title: msg, timer: 2200, showConfirmButton: false });
 })();
+
+
 </script>

@@ -488,13 +488,76 @@ include '../views/header.php';
             font-size: 11px;
         }
     }
+
+  .module-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #a0a0a0;
+    font-size: 17px;
+    margin-left: 5px;
+    cursor: help;
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
+
+.module-help:hover {
+    color: #0d6efd;
+}
+
+.module-help:focus:not(:hover) {
+    color: #a0a0a0;
+    outline: none;
+}
+
+.module-help::after {
+    content: attr(data-help);
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translate(-50%, -5px);
+    width: 290px;
+    padding: 12px 15px;
+    background: #ffffff;
+    color: #444;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.module-help:hover::after,
+.module-help.active::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
 </style>
 
 <div class="container-fluid mt-4 mb-5">
     <div class="estadisticas-wrapper">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
-                <h2 class="mb-1"><i class="fas fa-chart-line me-2"></i>Estadística de Habitaciones Alquiladas</h2>
+                <h2 class="mb-4">
+    <i class="fas fa-chart-line me-2"></i>Estadísticas
+
+    <span class="module-help"
+          tabindex="0"
+          role="button"
+          aria-expanded="false"
+          data-help="Desde este módulo puedes visualizar estadísticas generales de la posada, consultar indicadores sobre las reservaciones y ocupación de habitaciones, y analizar el comportamiento de la actividad del establecimiento mediante gráficos y datos resumidos.">
+        <i class="fas fa-question-circle"></i>
+    </span>
+</h2>
                 <p class="text-muted mb-0">Ventas de habitaciones filtradas por día, mes o año. Periodo: <strong><?= htmlspecialchars($tituloPeriodo) ?></strong></p>
             </div>
             <form method="POST" action="../controllers/exportar_estadisticas_pdf.php" target="_blank" class="no-print m-0">

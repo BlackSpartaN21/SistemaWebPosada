@@ -12,7 +12,17 @@ if (!isset($_SESSION['id_usuario'])) {
 
 <div class="container py-4">
   <div class="d-flex align-items-center justify-content-between mb-3">
-    <h3 class="mb-0">Copia de seguridad</h3>
+    <h2 class="mb-0">
+    <i class="fas fa-database me-2"></i>Copias de Seguridad
+
+    <span class="module-help"
+          tabindex="0"
+          role="button"
+          aria-expanded="false"
+          data-help="Desde este módulo puedes generar copias de seguridad de la base de datos para proteger la información del sistema. También puedes descargar respaldos existentes y restaurar la información cuando sea necesario.">
+        <i class="fas fa-question-circle"></i>
+    </span>
+</h2>
     <div class="d-flex gap-2">
       <button id="btnCrear" class="btn btn-primary">
         <i class="fa fa-database me-1"></i> Crear copia ahora
@@ -43,7 +53,60 @@ if (!isset($_SESSION['id_usuario'])) {
     </div>
   </div>
 </div>
+<style>
+    .module-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #a0a0a0;
+    font-size: 17px;
+    margin-left: 5px;
+    cursor: help;
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
 
+.module-help:hover {
+    color: #0d6efd;
+}
+
+.module-help:focus:not(:hover) {
+    color: #a0a0a0;
+    outline: none;
+}
+
+.module-help::after {
+    content: attr(data-help);
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translate(-50%, -5px);
+    width: 290px;
+    padding: 12px 15px;
+    background: #ffffff;
+    color: #444;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.module-help:hover::after,
+.module-help.active::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+</style>
 <script>
 (function () {
   // Ruta al controlador

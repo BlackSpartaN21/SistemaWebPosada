@@ -14,6 +14,11 @@
 
     <style>
 
+        #clienteModal .form-control::placeholder {
+            color: #9aa0a6;
+            opacity: 1;
+        }
+
         .form-label i {
     margin-right: 6px;
     color:rgb(0, 0, 0);
@@ -237,10 +242,10 @@
               <i class="fas fa-id-card"></i> Tipo de Documento
             </label>
             <select class="form-select" id="tipo_documento_cliente" name="tipo_documento_cliente" required>
-              <option value="V">V</option>
-              <option value="E">E</option>
-              <option value="P">P</option>
-              <option value="J">J</option>
+              <option value="V">V (Venezolano)</option>
+              <option value="E">E (Extranjero)</option>
+              <option value="P">P (Pasaporte)</option>
+              <option value="J">J (Jurídico)</option>
             </select>
             <div class="valid-feedback">Se ve bien.</div>
             <div class="invalid-feedback">Selecciona un tipo válido.</div>
@@ -250,7 +255,7 @@
             <label for="documento_cliente" class="form-label">
               <i class="fas fa-id-badge"></i> Documento
             </label>
-            <input type="text" class="form-control" id="documento_cliente" name="documento_cliente" maxlength="10" required>
+            <input type="text" class="form-control" id="documento_cliente" name="documento_cliente" maxlength="10" placeholder="Ej. 29886471" required>
             <div class="valid-feedback">Perfecto.</div>
           </div>
 
@@ -258,7 +263,7 @@
             <label for="nombres_cliente" class="form-label">
               <i class="fas fa-user"></i> Nombres
             </label>
-            <input type="text" class="form-control" id="nombres_cliente" name="nombres_cliente" maxlength="50" required>
+            <input type="text" class="form-control" id="nombres_cliente" name="nombres_cliente" maxlength="50" placeholder="Ej. José Rafael" required>
             <div class="valid-feedback">Correcto.</div>
             <div class="invalid-feedback">Solo letras y espacios (máx. 50).</div>
           </div>
@@ -267,7 +272,7 @@
             <label for="apellidos_cliente" class="form-label">
               <i class="fas fa-user-tag"></i> Apellidos
             </label>
-            <input type="text" class="form-control" id="apellidos_cliente" name="apellidos_cliente" maxlength="50" required>
+            <input type="text" class="form-control" id="apellidos_cliente" name="apellidos_cliente" maxlength="50" placeholder="Ej. Pérez Guillén" required>
             <div class="valid-feedback">Correcto.</div>
             <div class="invalid-feedback">Solo letras y espacios (máx. 50).</div>
           </div>
@@ -276,7 +281,7 @@
             <label for="telefono_cliente" class="form-label">
               <i class="fas fa-phone"></i> Teléfono
             </label>
-            <input type="text" class="form-control" id="telefono_cliente" name="telefono_cliente" maxlength="11" required>
+            <input type="text" class="form-control" id="telefono_cliente" name="telefono_cliente" maxlength="11" placeholder="Ej. 04121296542" required>
             <div class="valid-feedback">Se ve bien.</div>
             <div class="invalid-feedback">Debe contener exactamente 11 caracteres numéricos.</div>
           </div>
@@ -285,7 +290,7 @@
             <label for="correo_cliente" class="form-label">
               <i class="fas fa-envelope"></i> Correo Electrónico
             </label>
-            <input type="email" class="form-control" id="correo_cliente" name="correo_cliente" required>
+            <input type="email" class="form-control" id="correo_cliente" name="correo_cliente" placeholder="Ej. joseperez2917@gmail.com" required>
             <div class="valid-feedback">Correo válido.</div>
             <div class="invalid-feedback">Ingrese un correo válido.</div>
           </div>
@@ -294,7 +299,7 @@
             <label for="descripcion_cliente" class="form-label">
               <i class="fas fa-align-left"></i> Descripción (Opcional)
             </label>
-            <textarea class="form-control" id="descripcion_cliente" name="descripcion_cliente" rows="3" maxlength="100"></textarea>
+            <textarea class="form-control" id="descripcion_cliente" name="descripcion_cliente" rows="3" maxlength="100" placeholder="Ej. Cliente recomendado por un huésped."></textarea>
             <div class="valid-feedback">Ok.</div>
             <div class="invalid-feedback">Máximo 100 caracteres.</div>
           </div>

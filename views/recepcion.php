@@ -201,6 +201,74 @@ try {
     font-size: .85rem;
 }
 
+/* Icono de ayuda del módulo */
+.module-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #a0a0a0;
+    font-size: 17px;
+    margin-left: 5px;
+    cursor: help;
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
+
+.module-help:hover,
+.module-help:focus {
+    color: #0d6efd;
+    outline: none;
+}
+
+/* Recuadro de información */
+.module-help::after {
+    content: attr(data-help);
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translate(-50%, -5px);
+
+    width: 290px;
+    padding: 12px 15px;
+
+    background: #ffffff;
+    color: #444;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+/* Mostrar al pasar el mouse o enfocar */
+.module-help:hover::after,
+.module-help.active::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+/* Evitar que el icono permanezca azul después del clic */
+.module-help:focus {
+    color: #a0a0a0;
+    outline: none;
+}
+
+/* Azul únicamente mientras el mouse está encima */
+.module-help:hover {
+    color: #0d6efd;
+}
+
   </style>
   </head>
   <body>
@@ -272,7 +340,18 @@ try {
 
 
 
-          <h2 class="text-center">Listado de Habitaciones</h2><br>
+          <h2 class="text-center">
+    Listado de Habitaciones
+
+<span class="module-help"
+      tabindex="0"
+      role="button"
+      aria-expanded="false"
+      data-help="Desde este módulo puedes consultar las habitaciones disponibles y ocupadas, registrar reservaciones, revisar los datos de los huéspedes y gestionar el vaciado de las habitaciones.">
+    <i class="fas fa-question-circle"></i>
+</span>
+</h2>
+<br>
           <div class="row">
           <?php foreach ($habitaciones as $habitacion): ?>
       <div class="col-md-3 mb-3">
@@ -1043,6 +1122,8 @@ actualizarPrecioYTotal<?php echo $id; ?>();
   setTimeout(refreshHabStats, 2000);
   setInterval(refreshHabStats, 30000);
 })();
+
+
 </script>
 
 </html>
