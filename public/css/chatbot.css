@@ -1,0 +1,82 @@
+/* Botón flotante */
+#chat-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #e67e22; /* Un color naranja mandarina ideal para la posada */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    font-weight: bold;
+}
+
+/* Contenedor del chat */
+#chat-container {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 340px;
+    height: 450px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Clases para ocultar/mostrar */
+.chat-hidden { display: none !important; }
+
+/* Encabezado del chat */
+#chat-header {
+    background-color: #e67e22;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#chat-header h3 { margin: 0; font-size: 16px; }
+#chat-header button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; }
+
+/* Caja de mensajes */
+#chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #f9f9f9;
+}
+
+/* Estilos de los mensajes */
+.msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 14px; line-height: 1.4; }
+.bot-msg { background-color: #ffffff; align-self: flex-start; color: #333; box-shadow: 0px 2px 5px rgba(0,0,0,0.05); }
+.user-msg { background-color: #e67e22; color: white; align-self: flex-end; }
+
+/* Botones de opciones */
+.chat-btn {
+    background-color: transparent;
+    border: 1px solid #e67e22;
+    color: #e67e22;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.2s;
+    font-size: 13px;
+    font-weight: 500;
+    width: 100%;
+}
+.chat-btn:hover { background-color: #e67e22; color: white; }
+.chat-btn:disabled { border-color: #ccc; color: #ccc; cursor: not-allowed; background: none; }
