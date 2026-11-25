@@ -16,7 +16,21 @@ $usuarios = $pdo->query("
 ")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <div class="container-fluid mt-4">
+<<<<<<< HEAD
   <h3 class="mb-3"><i class="fa-solid fa-scroll me-2"></i>Bitácora del sistema</h3>
+=======
+  <h2 class="mb-4">
+    <i class="fas fa-history me-2"></i>Bitácora del Sistema
+
+    <span class="module-help"
+          tabindex="0"
+          role="button"
+          aria-expanded="false"
+          data-help="Desde este módulo puedes consultar el historial de actividades realizadas por los usuarios, identificar quién ejecutó cada acción y revisar información como la fecha, hora y descripción de los eventos registrados en el sistema.">
+        <i class="fas fa-question-circle"></i>
+    </span>
+</h2>
+>>>>>>> ramaLuis
 
   <div class="card shadow-sm mb-3">
     <div class="card-body">
@@ -120,6 +134,99 @@ $usuarios = $pdo->query("
   td.truncate { max-width: 360px; overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 1200px) { td.truncate { max-width: 260px; } }
   @media (max-width: 992px)  { td.truncate { max-width: 200px; } }
+<<<<<<< HEAD
+=======
+
+  td.detail-cell {
+    min-width: 260px;
+    max-width: 420px;
+    white-space: normal;
+  }
+
+  .detail-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #495057;
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  .detail-preview-item {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .detail-preview-item strong {
+    color: #343a40;
+  }
+
+  .btn-ver-detalle {
+    border-radius: 6px;
+    font-size: 0.78rem;
+    padding: 3px 9px;
+  }
+
+  #detalleModalBody {
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: #343a40;
+  }
+
+    .module-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #a0a0a0;
+    font-size: 17px;
+    margin-left: 5px;
+    cursor: help;
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
+
+.module-help:hover {
+    color: #0d6efd;
+}
+
+.module-help:focus:not(:hover) {
+    color: #a0a0a0;
+    outline: none;
+}
+
+.module-help::after {
+    content: attr(data-help);
+    position: absolute;
+    z-index: 1080;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translate(-50%, -5px);
+    width: 290px;
+    padding: 12px 15px;
+    background: #ffffff;
+    color: #444;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.module-help:hover::after,
+.module-help.active::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+>>>>>>> ramaLuis
 </style>
 
 <script>
@@ -143,6 +250,95 @@ $usuarios = $pdo->query("
     const colIdx = { fecha:0, usuario:1, rol:2, modulo:3, accion:4, detalle:5, resultado:6, ip:7, ua:8 };
     const langUrl = '../public/js/es-ES.json';
 
+<<<<<<< HEAD
+=======
+    // Convierte nombres técnicos (id_reserva, fecha_inicio) en etiquetas legibles.
+    function humanizeKey(key) {
+      const labels = {
+        id_usuario: 'Usuario ID',
+        id_cliente: 'Cliente ID',
+        id_reserva: 'Reserva ID',
+        id_habitacion: 'Habitación ID',
+        id_tarifa: 'Tarifa ID',
+        documento_cliente: 'Documento del cliente',
+        nombre_cliente: 'Nombre del cliente',
+        nombre_usuario: 'Usuario',
+        fecha_entrada: 'Fecha de entrada',
+        fecha_salida: 'Fecha de salida',
+        metodo_pago: 'Método de pago',
+        estado_reserva: 'Estado de la reservación'
+      };
+
+      const original = String(key ?? '');
+      if (labels[original.toLowerCase()]) return labels[original.toLowerCase()];
+
+      return original
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/^./, c => c.toUpperCase());
+    }
+
+    function parseDetail(raw) {
+      if (raw === null || raw === undefined || raw === '') return 'Sin detalles adicionales';
+      if (typeof raw !== 'string') return raw;
+
+      const trimmed = raw.trim();
+      if (!trimmed) return 'Sin detalles adicionales';
+
+      try {
+        return JSON.parse(trimmed);
+      } catch (e) {
+        return raw;
+      }
+    }
+
+    function readableValue(value) {
+      if (value === null || value === undefined || value === '') return 'No especificado';
+      if (typeof value === 'boolean') return value ? 'Sí' : 'No';
+      if (typeof value === 'object') return JSON.stringify(value, null, 2);
+      return String(value);
+    }
+
+    function formatDetailPreview(raw) {
+      const detail = parseDetail(raw);
+      if (typeof detail === 'object' && detail !== null && !Array.isArray(detail)) {
+        const entries = Object.entries(detail);
+        if (!entries.length) return '<span class="text-muted">Sin información adicional</span>';
+
+        const summary = entries.slice(0, 2).map(([key, value]) => {
+          const valueText = (value !== null && typeof value === 'object')
+            ? (Array.isArray(value) ? `(${value.length} elementos)` : 'Información adicional')
+            : readableValue(value);
+          return `<span class="detail-preview-item"><strong>${$('<div>').text(humanizeKey(key)).html()}:</strong> ${$('<div>').text(valueText).html()}</span>`;
+        }).join('');
+
+        return `<div class="detail-preview">${summary}</div><button type="button" class="btn btn-sm btn-outline-primary btn-ver-detalle mt-1"><i class="fas fa-eye me-1"></i>Ver detalles</button>`;
+      }
+
+      const text = readableValue(detail);
+      const short = text.length > 95 ? text.slice(0, 95) + '…' : text;
+      return `<div class="detail-preview">${$('<div>').text(short).html()}</div><button type="button" class="btn btn-sm btn-outline-primary btn-ver-detalle mt-1"><i class="fas fa-eye me-1"></i>Ver detalles</button>`;
+    }
+
+    function formatDetailFull(raw) {
+      const detail = parseDetail(raw);
+
+      if (typeof detail === 'object' && detail !== null && !Array.isArray(detail)) {
+        const entries = Object.entries(detail);
+        if (!entries.length) return 'Sin información adicional';
+
+        return entries.map(([key, value]) => {
+          return `${humanizeKey(key)}:\n${readableValue(value)}`;
+        }).join('\n\n');
+      }
+
+      if (Array.isArray(detail)) return JSON.stringify(detail, null, 2);
+      return readableValue(detail);
+    }
+
+>>>>>>> ramaLuis
     const $tabla = $('#tablaBitacora').DataTable({
       processing: true,
       serverSide: true,
@@ -179,6 +375,7 @@ $usuarios = $pdo->query("
         { data: 'modulo', className: 'nowrap' },
         { data: 'accion', className: 'nowrap' },
         { data: 'detalle',
+<<<<<<< HEAD
           className: 'truncate',
           render: function (data, type) {
             if (type !== 'display') return data;
@@ -188,6 +385,13 @@ $usuarios = $pdo->query("
             const safe = $('<div>').text(text).html();
             const short = safe.length > 120 ? safe.slice(0, 120) + '…' : safe;
             return '<span title="'+safe+'">'+short+'</span>';
+=======
+          className: 'detail-cell',
+          render: function (data, type) {
+            if (type !== 'display') return data;
+            if (!data || data === '—') return '<span class="text-muted">Sin detalles</span>';
+            return formatDetailPreview(data);
+>>>>>>> ramaLuis
           }
         },
         { data: 'resultado',
@@ -217,6 +421,18 @@ $usuarios = $pdo->query("
       language: { url: langUrl }
     });
 
+<<<<<<< HEAD
+=======
+    // Abre el detalle completo y lo presenta con etiquetas y saltos de línea.
+    $('#tablaBitacora tbody').on('click', '.btn-ver-detalle', function () {
+      const fila = $tabla.row($(this).closest('tr')).data();
+      if (!fila) return;
+
+      $('#detalleModalBody').text(formatDetailFull(fila.detalle));
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('detalleModal')).show();
+    });
+
+>>>>>>> ramaLuis
     // Placeholder al buscador global de DataTables
     $('#tablaBitacora_filter input').attr('placeholder', 'Buscar módulo / acción / detalle / usuario');
 

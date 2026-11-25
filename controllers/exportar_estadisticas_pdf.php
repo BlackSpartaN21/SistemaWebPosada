@@ -138,6 +138,154 @@ function money($value): string {
     return '$ ' . number_format((float)$value, 2, ',', '.');
 }
 
+<<<<<<< HEAD
+=======
+
+/**
+ * Dibuja un título de sección para los gráficos.
+ */
+function tituloGrafico(PDF $pdf, string $titulo): void {
+    $pdf->SetFont('helvetica', 'B', 11);
+    $pdf->SetTextColor(45, 45, 45);
+    $pdf->Cell(0, 7, $titulo, 0, 1, 'L');
+    $pdf->SetDrawColor(186, 59, 10);
+    $pdf->SetLineWidth(0.5);
+    $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
+    $pdf->Ln(4);
+}
+
+/**
+ * Gráfico de barras horizontales. Los valores y porcentajes se calculan
+ * con los mismos datos filtrados que utiliza el módulo de estadísticas.
+ */
+function graficoBarrasHorizontales(
+    PDF $pdf,
+    string $titulo,
+    array $datos,
+    string $campoEtiqueta,
+    string $campoValor,
+    string $campoSecundario = '',
+    bool $esMoneda = true
+): void {
+    tituloGrafico($pdf, $titulo);
+
+    if (!$datos) {
+        $pdf->SetFont('helvetica', 'I', 9);
+        $pdf->SetTextColor(110, 110, 110);
+        $pdf->Cell(0, 12, 'No hay datos para el periodo seleccionado.', 0, 1, 'C');
+        $pdf->Ln(3);
+        return;
+    }
+
+    $maximo = 0.0;
+    foreach ($datos as $dato) {
+        $maximo = max($maximo, (float)($dato[$campoValor] ?? 0));
+    }
+
+    $altoFila = 11;
+    $anchoEtiqueta = 38;
+    $anchoBarra = 112;
+    $anchoValor = 40;
+
+    foreach ($datos as $dato) {
+        $etiqueta = (string)($dato[$campoEtiqueta] ?? '');
+        if ($campoSecundario !== '' && !empty($dato[$campoSecundario])) {
+            $etiqueta .= ' - ' . (string)$dato[$campoSecundario];
+        }
+
+        $valor = (float)($dato[$campoValor] ?? 0);
+        $proporcion = $maximo > 0 ? min(1, $valor / $maximo) : 0;
+
+        $y = $pdf->GetY();
+        $pdf->SetFont('helvetica', '', 8);
+        $pdf->SetTextColor(55, 55, 55);
+        $pdf->SetXY(10, $y);
+        $pdf->Cell($anchoEtiqueta, $altoFila, mb_strimwidth($etiqueta, 0, 27, '...'), 0, 0, 'L');
+
+        $xBarra = 10 + $anchoEtiqueta;
+        $pdf->SetFillColor(240, 240, 240);
+        $pdf->Rect($xBarra, $y + 3, $anchoBarra, 5, 'F');
+
+        if ($proporcion > 0) {
+            $pdf->SetFillColor(186, 59, 10);
+            $pdf->Rect($xBarra, $y + 3, max(1, $anchoBarra * $proporcion), 5, 'F');
+        }
+
+        $textoValor = $esMoneda ? money($valor) : number_format($valor, 0, ',', '.');
+        $pdf->SetXY($xBarra + $anchoBarra + 2, $y);
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->Cell($anchoValor, $altoFila, $textoValor, 0, 1, 'R');
+    }
+    $pdf->Ln(3);
+}
+
+/**
+ * Gráfico de columnas para el comportamiento temporal y la comparación mensual.
+ */
+function graficoBarrasVerticales(
+    PDF $pdf,
+    string $titulo,
+    array $datos,
+    string $campoEtiqueta,
+    string $campoValor,
+    bool $esMoneda = true,
+    int $alturaGrafico = 48
+): void {
+    tituloGrafico($pdf, $titulo);
+
+    if (!$datos) {
+        $pdf->SetFont('helvetica', 'I', 9);
+        $pdf->SetTextColor(110, 110, 110);
+        $pdf->Cell(0, 12, 'No hay datos para el periodo seleccionado.', 0, 1, 'C');
+        $pdf->Ln(3);
+        return;
+    }
+
+    $maximo = 0.0;
+    foreach ($datos as $dato) {
+        $maximo = max($maximo, (float)($dato[$campoValor] ?? 0));
+    }
+
+    $xInicial = 12;
+    $anchoUtil = 186;
+    $cantidad = count($datos);
+    $anchoItem = $anchoUtil / max(1, $cantidad);
+    $anchoBarra = min(11, max(3, $anchoItem * 0.48));
+    $yBase = $pdf->GetY() + $alturaGrafico + 4;
+
+    $pdf->SetDrawColor(190, 190, 190);
+    $pdf->Line($xInicial, $yBase, 198, $yBase);
+
+    foreach ($datos as $i => $dato) {
+        $valor = (float)($dato[$campoValor] ?? 0);
+        $alto = $maximo > 0 ? ($valor / $maximo) * $alturaGrafico : 0;
+        $centroX = $xInicial + ($i * $anchoItem) + ($anchoItem / 2);
+        $xBarra = $centroX - ($anchoBarra / 2);
+        $yBarra = $yBase - $alto;
+
+        if ($alto > 0) {
+            $pdf->SetFillColor(186, 59, 10);
+            $pdf->Rect($xBarra, $yBarra, $anchoBarra, $alto, 'F');
+        }
+
+        $pdf->SetFont('helvetica', '', $cantidad > 14 ? 5.5 : 6.5);
+        $pdf->SetTextColor(65, 65, 65);
+        $textoValor = $esMoneda
+            ? number_format($valor, 0, ',', '.')
+            : number_format($valor, 0, ',', '.');
+        $pdf->SetXY($centroX - ($anchoItem / 2), max($pdf->GetY(), $yBarra - 5));
+        $pdf->Cell($anchoItem, 4, $textoValor, 0, 0, 'C');
+
+        $etiqueta = (string)($dato[$campoEtiqueta] ?? '');
+        $pdf->SetXY($centroX - ($anchoItem / 2), $yBase + 1);
+        $pdf->Cell($anchoItem, 7, mb_strimwidth($etiqueta, 0, $cantidad > 14 ? 5 : 10, ''), 0, 0, 'C');
+    }
+
+    $pdf->SetY($yBase + 10);
+    $pdf->Ln(3);
+}
+
+>>>>>>> ramaLuis
 try {
     $stmtResumen = $pdo->prepare("
         SELECT
@@ -291,6 +439,7 @@ try {
     $stmtDiasMovimiento->execute($params);
     $diasMovimiento = $stmtDiasMovimiento->fetchAll(PDO::FETCH_ASSOC);
 
+<<<<<<< HEAD
     $stmtDetalle = $pdo->prepare("
         SELECT
             r.id_reserva, h.nombre_habitacion, th.nombre_tipo_habitacion, tf.tipo_tarifa,
@@ -308,6 +457,8 @@ try {
     $stmtDetalle->execute($params);
     $detalleVentas = $stmtDetalle->fetchAll(PDO::FETCH_ASSOC);
 
+=======
+>>>>>>> ramaLuis
     $pdf = new PDF('P', 'mm', 'A4');
     $pdf->SetCreator('Sistema Web Posada Las Mandarinas');
     $pdf->SetAuthor('Posada Las Mandarinas');
@@ -374,6 +525,7 @@ try {
     ';
     $pdf->writeHTML($htmlIndicadores, true, false, true, false, '');
 
+<<<<<<< HEAD
     $pdf->Ln(2);
     $pdf->SetFont('helvetica', 'B', 11);
     $pdf->Write(6, 'Comparación mensual del año '.$anioComparacion);
@@ -523,6 +675,80 @@ try {
     }
     $htmlDetalle .= '</tbody></table>';
     $pdf->writeHTML($htmlDetalle, true, false, true, false, '');
+=======
+    // Gráfico 1: ventas por habitación.
+    $pdf->Ln(5);
+    graficoBarrasHorizontales(
+        $pdf,
+        'Ventas por habitación',
+        $ventasHabitaciones,
+        'nombre_habitacion',
+        'total_ventas',
+        'nombre_tipo_habitacion',
+        true
+    );
+
+    // Página de gráficos temporales.
+    $pdf->AddPage();
+    graficoBarrasVerticales(
+        $pdf,
+        'Comportamiento del periodo',
+        $ventasTiempo,
+        'etiqueta',
+        'total_ventas',
+        true,
+        48
+    );
+
+    graficoBarrasVerticales(
+        $pdf,
+        'Comparación mensual del año '.$anioComparacion,
+        array_values($comparacionMensual),
+        'mes',
+        'total_ventas',
+        true,
+        48
+    );
+
+    // Página de movimiento por día y clientes frecuentes.
+    $pdf->AddPage();
+    graficoBarrasHorizontales(
+        $pdf,
+        'Días con mayor movimiento',
+        $diasMovimiento,
+        'nombre_dia',
+        'cantidad_reservas',
+        '',
+        false
+    );
+
+    $pdf->Ln(2);
+    $pdf->SetFont('helvetica', 'B', 11);
+    $pdf->SetTextColor(45, 45, 45);
+    $pdf->Cell(0, 7, 'Top 5 clientes frecuentes', 0, 1, 'L');
+    $pdf->SetFillColor(186, 59, 10);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->Cell(10, 7, '#', 1, 0, 'C', true);
+    $pdf->Cell(70, 7, 'Cliente', 1, 0, 'C', true);
+    $pdf->Cell(35, 7, 'Documento', 1, 0, 'C', true);
+    $pdf->Cell(30, 7, 'Reservas', 1, 0, 'C', true);
+    $pdf->Cell(45, 7, 'Total', 1, 1, 'C', true);
+
+    $pdf->SetTextColor(45, 45, 45);
+    $pdf->SetFont('helvetica', '', 8);
+    if (!$topClientes) {
+        $pdf->Cell(190, 9, 'No hay clientes frecuentes para el periodo seleccionado.', 1, 1, 'C');
+    } else {
+        foreach ($topClientes as $i => $c) {
+            $pdf->Cell(10, 8, (string)($i + 1), 1, 0, 'C');
+            $pdf->Cell(70, 8, mb_strimwidth((string)$c['nombre_cliente'], 0, 38, '...'), 1, 0, 'L');
+            $pdf->Cell(35, 8, (string)$c['documento_cliente'], 1, 0, 'C');
+            $pdf->Cell(30, 8, (string)(int)$c['cantidad_reservas'], 1, 0, 'C');
+            $pdf->Cell(45, 8, money($c['total_ventas']), 1, 1, 'R');
+        }
+    }
+>>>>>>> ramaLuis
 
     bitacora_log($pdo, 'Estadísticas', 'exportar_pdf', [
         'filtro' => $tipoFiltro,

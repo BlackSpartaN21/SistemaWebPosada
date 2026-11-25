@@ -108,11 +108,11 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto"> <!-- Alineación a la izquierda de todos los módulos -->
                         <li class="nav-item">
-                            <a class="nav-link" href="recepcion.php">Recepción</a>
+                            <a class="nav-link" href="recepcion.php"><i class="fas fa-concierge-bell me-2" aria-hidden="true"></i>Recepción</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="clientesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Clientes
+                                <i class="fas fa-users me-2" aria-hidden="true"></i>Clientes
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="clientesDropdown">
                                 <li><a class="dropdown-item" href="./registrar.php" data-bs-toggle="modal" data-bs-target="#clienteModal">Registrar</a></li>
@@ -120,7 +120,7 @@
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="reportes.php">Reportes</a>
+                            <a class="nav-link" href="reportes.php"><i class="fas fa-chart-bar me-2" aria-hidden="true"></i>Reportes</a>
                         </li>
                         <?php if ($rol === 'Administrador'): ?>
                       <li class="nav-item dropdown">

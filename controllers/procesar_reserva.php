@@ -5,6 +5,10 @@ declare(strict_types=1);
 session_start();
 require_once '../config/db.php';
 require_once '../config/bitacora.php'; // [BITÁCORA]
+<<<<<<< HEAD
+=======
+require_once '../config/reservas_conversion.php';
+>>>>>>> ramaLuis
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     try {
@@ -193,20 +197,52 @@ $monto_total = $dias_estadia * $precio;
 $monto_total_bs = $tasa_conversion > 0 ? round($monto_total * $tasa_conversion, 2) : null;
 $estado      = 'Confirmada';
 
+// Obtener el nombre del método de pago para registrarlo de forma legible en la bitácora.
+$stmtMetodo = $pdo->prepare(
+    "SELECT nombre_metodo_pago FROM metodos_de_pago WHERE id_metodo_pago = ?"
+);
+$stmtMetodo->execute([$metodo_pago]);
+$nombreMetodoPago = $stmtMetodo->fetchColumn();
+$nombreMetodoPago = $nombreMetodoPago ?: 'No especificado';
+
 // ==== Transacción: insertar reserva + marcar habitación ocupada ====
 try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare("
-        INSERT INTO reservas (
-            id_habitacion, documento_cliente, id_tarifa, fecha_llegada, fecha_salida,
-            cantidad_personas, monto_total, id_metodo_pago, estado_reserva, observaciones_reserva, origen_reserva
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    $ok1 = $stmt->execute([
-        $id_habitacion, $documento_cliente, $id_tarifa, $fecha_llegada, $fecha_salida,
-        $cantidad_personas, $monto_total, $metodo_pago, $estado, $observaciones, $origen
-    ]);
+    $tieneColumnasConversion = reservas_tiene_columnas_conversion($pdo);
+
+    if ($tieneColumnasConversion) {
+        $stmt = $pdo->prepare("
+            INSERT INTO reservas (
+                id_habitacion, documento_cliente, id_tarifa, fecha_llegada, fecha_salida,
+                cantidad_personas, monto_total, monto_total_bs, tasa_conversion, modo_tasa_conversion,
+                id_metodo_pago, estado_reserva, observaciones_reserva, origen_reserva
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $ok1 = $stmt->execute([
+            $id_habitacion, $documento_cliente, $id_tarifa, $fecha_llegada, $fecha_salida,
+            $cantidad_personas, $monto_total, $monto_total_bs,
+            $tasa_conversion > 0 ? $tasa_conversion : null,
+            $tasa_conversion > 0 ? $modo_tasa_conversion : null,
+            $metodo_pago, $estado, $observaciones, $origen
+        ]);
+    } else {
+        // Compatibilidad: si aún no se ejecutó la migración, la reserva se guarda
+        // sin romper el flujo actual y los reportes mostrarán "—" en Monto Total Bs.
+        $stmt = $pdo->prepare("
+            INSERT INTO reservas (
+                id_habitacion, documento_cliente, id_tarifa, fecha_llegada, fecha_salida,
+                cantidad_personas, monto_total, id_metodo_pago, estado_reserva, observaciones_reserva, origen_reserva
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $ok1 = $stmt->execute([
+            $id_habitacion, $documento_cliente, $id_tarifa, $fecha_llegada, $fecha_salida,
+            $cantidad_personas, $monto_total, $metodo_pago, $estado, $observaciones, $origen
+        ]);
+    }
+
+    // Recuperar el ID inmediatamente después del INSERT.
+    $reservaId = (int)$pdo->lastInsertId();
 
     // Marcar habitación como ocupada (estado = 0)
     $stmt = $pdo->prepare("UPDATE habitaciones SET estado_habitacion = 0 WHERE id_habitacion = ?");
