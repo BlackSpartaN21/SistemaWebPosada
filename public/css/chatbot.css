@@ -45,6 +45,25 @@
     justify-content: space-between;
     align-items: center;
 }
+#chat-header button { 
+    background: transparent !important; 
+    background-color: transparent !important; 
+    border: none !important; 
+    color: white !important; 
+    cursor: pointer; 
+    font-size: 18px; 
+    padding: 5px !important;
+    margin: 0;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#chat-header button:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #f39c12 !important; 
+}
 #chat-header h3 { margin: 0; font-size: 16px; }
 #chat-header button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; }
 
